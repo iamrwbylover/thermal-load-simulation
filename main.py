@@ -78,9 +78,9 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 						self.lengthBox.value(),self.widthBox.value(),
 						self.heightBox.value(),self.normVectorBox.value(),
 						self.initialTempBox.value(),self.comfTempBox.value())
-			print(s.comfTemp)
-			sunpath.Foo.printf(s)
-			self.close()
+			self.statusBar.showMessage("Saved.", 2000)
+			x = sunpath.Foo()
+			x.printf(s)
 		else:
 			self.close()
 			self.statusBar.showMessage("Cancelled.", 2000)
