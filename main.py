@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-import test
+import save
+import sunpath
 
 
 mainWindowUI = "thesisgui.ui"
@@ -67,10 +68,23 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		if retVal == QtWidgets.QMessageBox.Ok:
 			self.statusBar.showMessage("Saving...", 2000)
-			test.Test.testFunction(self.dataset)
-			
+			s = save.Save(self.latitudeBox.value(),self.longitudeBox.value(),
+						self.altitudeBox.value(),self.dateEdit.date().toPyDate(),
+						self.swReflBox.value(),self.lwReflBox.value(),
+						self.lwEmissBox.value(),self.thicknessBox.value(),
+						self.spec_heatBox.value(),self.thermal_conBox.value(),
+						self.conv_coeffBox.value(),self.densityBox.value(),
+						self.short_absBox.value(),self.long_emissBox.value(),
+						self.lengthBox.value(),self.widthBox.value(),
+						self.heightBox.value(),self.normVectorBox.value(),
+						self.initialTempBox.value(),self.comfTempBox.value())
+			print(s.comfTemp)
+			sunpath.Foo.printf(s)
+			self.close()
 		else:
+			self.close()
 			self.statusBar.showMessage("Cancelled.", 2000)
+
 
 
 
