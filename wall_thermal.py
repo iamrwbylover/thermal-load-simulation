@@ -7,7 +7,7 @@ Created on Tue Apr 05 23:15:11 2016
 
 import numpy as np
 import matplotlib.pyplot as mp
-from sympy import Symbol, diff, simplify, cos, sin
+from sympy import Symbol, diff, simplify, cos, 
 
 
 #-----------------initialization-----------------------------------------------
@@ -109,18 +109,18 @@ def LST(lt):
 #------------------end---------------------------------------------------------
 #------------------------sun path loops----------------------------------------    
     
-for i in xrange(365):
+for i in range(365):
     sp.EoT[i] = EOT(B(i))
     sp.TC[i] = 4*(sett.longitude-LSTM) + sp.EoT[i]
 
-for i in xrange(N):
+for i in range(N):
     sp.HRA[i] = (15*(LST(sp.hr[i])-12))*np.pi/180
 #----------------------------end-----------------------------------------------
 
 #--------------------------elevation and azimuthal angles----------------------
 delta = (23.45*np.sin((((360.0/365)*(sett.day-81))*np.pi/180)))*np.pi/180
 
-for i in xrange(N):
+for i in range(N):
     a.elev[i] = np.arcsin(np.sin(delta)*np.sin(sett.latitude)
                 + np.cos(delta)*np.cos(sett.latitude)*np.cos(sp.HRA[i])) 
     a.azi[i] = np.arccos((np.sin(delta)*np.cos(sett.latitude)
@@ -195,7 +195,7 @@ class environment():
         
     
     def airtemp(self):
-        for i in xrange(N):
+        for i in range(N):
             at[i] = air_temp(sp.hr[i])
             
 env = environment()        
@@ -204,7 +204,7 @@ env = environment()
 env.airtemp()
 
 
-for i in xrange(N):
+for i in range(N):
     if a.elev[i] < 0:
         I_dni[i] = 0
     else:
@@ -337,7 +337,7 @@ I1 = np.zeros(N)
 I2 = np.zeros(N)
 I3 = np.zeros(N)
 I4 = np.zeros(N)
-for i in xrange(N):
+for i in range(N):
     rad.I_long(i)
     
     
@@ -389,7 +389,7 @@ T4 = np.zeros(N)
 
 
 
-for i in xrange(N):
+for i in range(N):
     Tain.append(Ts)
     Ts += hz*Tx(Ts,i,10)
 
