@@ -72,6 +72,7 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 			fileName = save.Save(self.dataset)
 			print(fileName)
 			self.statusBar.showMessage("Saved.", 2000)
+			sunpath.assignValues(fileName)
 		else:
 			self.close()
 			self.statusBar.showMessage("Cancelled.", 2000)
