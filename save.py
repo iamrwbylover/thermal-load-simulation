@@ -1,3 +1,6 @@
+# Saves the values from the initial window
+
+
 import pandas as pd 
 import datetime
 
@@ -10,18 +13,13 @@ writer = pd.ExcelWriter(fileName, engine='xlsxwriter')
 
 def Save(dataset):
 	for dic in sorted(dataset):
-		print("-------------",dic,"-----------------")
 		labelArray = []
 		dataArray = []
 		sheetName = str(dic)
-	
 		for subdic in sorted(dataset[dic]):
 			dataArray.append(dataset[dic][subdic])
 			labelArray.append(subdic)
-		
-			print(subdic, dataset[dic][subdic])		
-		print("-------------------------------------")
-		df = pd.DataFrame({'Label':labelArray,
+		df = pd.DataFrame({'Variable':labelArray,
 							'Value':dataArray})
 		df.to_excel(writer, sheet_name=sheetName)
 	writer.save()

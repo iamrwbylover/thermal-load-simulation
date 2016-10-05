@@ -28,23 +28,7 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.setStatusBar(self.statusBar)
 		self.save.clicked.connect(self.saveButton)
 
-		#data list
-		self.locationSett = {'latitude':self.latitudeBox.value(), 'longitude':self.longitudeBox.value(),
-							'altitude':self.altitudeBox.value()}
-		self.dateSett = {'date':str(self.dateEdit.date().toPyDate())}
-		self.envSett = {'swCoeff':self.swReflBox.value(), 'lwCoeff':self.lwReflBox.value(),
-						'lwEmiss':self.lwEmissBox.value()}
-		self.thermalSett = {'thickness':self.thicknessBox.value(), 'specific heat':self.spec_heatBox.value(), 'thermal conductance':self.thermal_conBox.value(),
-							'convective coefficient':self.conv_coeffBox.value(), 'density':self.densityBox.value()}
-		self.radConSett = {'shortwave absorptivity':self.short_absBox.value(), 'long wave emissivity':self.long_emissBox.value()}
-		self.dimensionSett = {'length':self.lengthBox.value(), 'width':self.widthBox.value(), 'height':self.heightBox.value(),
-								'direction':self.normVectorBox.value()}
-		self.tempSett = {'initial temperature':self.initialTempBox.value(), 'comfortable temperature':self.comfTempBox.value()}
-
-
-		self.dataset = {'location settings':self.locationSett, 'date settings':self.dateSett, 'environmental settings':self.envSett,
-						'thermal properties':self.thermalSett, 'radiation constants':self.radConSett, 'dimension settings':self.dimensionSett,
-						'temperature settings':self.tempSett}
+		
 
 
 
@@ -68,18 +52,24 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		if retVal == QtWidgets.QMessageBox.Ok:
 			self.statusBar.showMessage("Saving...", 2000)
-			# s = save.Save(self.latitudeBox.value(),self.longitudeBox.value(),
-			# 			self.altitudeBox.value(),self.dateEdit.date().toPyDate(),
-			# 			self.swReflBox.value(),self.lwReflBox.value(),
-			# 			self.lwEmissBox.value(),self.thicknessBox.value(),
-			# 			self.spec_heatBox.value(),self.thermal_conBox.value(),
-			# 			self.conv_coeffBox.value(),self.densityBox.value(),
-			# 			self.short_absBox.value(),self.long_emissBox.value(),
-			# 			self.lengthBox.value(),self.widthBox.value(),
-			# 			self.heightBox.value(),self.normVectorBox.value(),
-			# 			self.initialTempBox.value(),self.comfTempBox.value())
-			# x = sunpath.Foo()
-			# x.printf(s)
+			#data list
+			self.locationSett = {'latitude':self.latitudeBox.value(), 'longitude':self.longitudeBox.value(),
+							'altitude':self.altitudeBox.value()}
+			self.dateSett = {'date':str(self.dateEdit.date().toPyDate())}
+			self.envSett = {'swCoeff':self.swReflBox.value(), 'lwCoeff':self.lwReflBox.value(),
+						'lwEmiss':self.lwEmissBox.value()}
+			self.thermalSett = {'thickness':self.thicknessBox.value(), 'specific heat':self.spec_heatBox.value(), 'thermal conductance':self.thermal_conBox.value(),
+							'convective coefficient':self.conv_coeffBox.value(), 'density':self.densityBox.value()}
+			self.radConSett = {'shortwave absorptivity':self.short_absBox.value(), 'long wave emissivity':self.long_emissBox.value()}
+			self.dimensionSett = {'length':self.lengthBox.value(), 'width':self.widthBox.value(), 'height':self.heightBox.value(),
+								'direction':self.normVectorBox.value()}
+			self.tempSett = {'initial temperature':self.initialTempBox.value(), 'comfortable temperature':self.comfTempBox.value()}
+
+
+			self.dataset = {'location settings':self.locationSett, 'date settings':self.dateSett, 'environmental settings':self.envSett,
+						'thermal properties':self.thermalSett, 'radiation constants':self.radConSett, 'dimension settings':self.dimensionSett,
+						'temperature settings':self.tempSett}
+			
 			save.Save(self.dataset)
 			self.statusBar.showMessage("Saved.", 2000)
 		else:
