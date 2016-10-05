@@ -43,7 +43,7 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 		self.dataset = {'location settings':self.locationSett, 'date settings':self.dateSett, 'environmental settings':self.envSett,
-						'thermal properties':self.thermalSett, 'radiation constants':self.radConSett, 'dimenstion settings':self.dimensionSett,
+						'thermal properties':self.thermalSett, 'radiation constants':self.radConSett, 'dimension settings':self.dimensionSett,
 						'temperature settings':self.tempSett}
 
 
@@ -68,19 +68,20 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		if retVal == QtWidgets.QMessageBox.Ok:
 			self.statusBar.showMessage("Saving...", 2000)
-			s = save.Save(self.latitudeBox.value(),self.longitudeBox.value(),
-						self.altitudeBox.value(),self.dateEdit.date().toPyDate(),
-						self.swReflBox.value(),self.lwReflBox.value(),
-						self.lwEmissBox.value(),self.thicknessBox.value(),
-						self.spec_heatBox.value(),self.thermal_conBox.value(),
-						self.conv_coeffBox.value(),self.densityBox.value(),
-						self.short_absBox.value(),self.long_emissBox.value(),
-						self.lengthBox.value(),self.widthBox.value(),
-						self.heightBox.value(),self.normVectorBox.value(),
-						self.initialTempBox.value(),self.comfTempBox.value())
+			# s = save.Save(self.latitudeBox.value(),self.longitudeBox.value(),
+			# 			self.altitudeBox.value(),self.dateEdit.date().toPyDate(),
+			# 			self.swReflBox.value(),self.lwReflBox.value(),
+			# 			self.lwEmissBox.value(),self.thicknessBox.value(),
+			# 			self.spec_heatBox.value(),self.thermal_conBox.value(),
+			# 			self.conv_coeffBox.value(),self.densityBox.value(),
+			# 			self.short_absBox.value(),self.long_emissBox.value(),
+			# 			self.lengthBox.value(),self.widthBox.value(),
+			# 			self.heightBox.value(),self.normVectorBox.value(),
+			# 			self.initialTempBox.value(),self.comfTempBox.value())
 			self.statusBar.showMessage("Saved.", 2000)
-			x = sunpath.Foo()
-			x.printf(s)
+			# x = sunpath.Foo()
+			# x.printf(s)
+			save.Save(self.dataset)
 		else:
 			self.close()
 			self.statusBar.showMessage("Cancelled.", 2000)
