@@ -31,7 +31,7 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		#data list
 		self.locationSett = {'latitude':self.latitudeBox.value(), 'longitude':self.longitudeBox.value(),
 							'altitude':self.altitudeBox.value()}
-		self.dateSett = {'date':self.dateEdit.date().toPyDate()}
+		self.dateSett = {'date':str(self.dateEdit.date().toPyDate())}
 		self.envSett = {'swCoeff':self.swReflBox.value(), 'lwCoeff':self.lwReflBox.value(),
 						'lwEmiss':self.lwEmissBox.value()}
 		self.thermalSett = {'thickness':self.thicknessBox.value(), 'specific heat':self.spec_heatBox.value(), 'thermal conductance':self.thermal_conBox.value(),
