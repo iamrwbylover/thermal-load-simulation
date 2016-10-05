@@ -36,13 +36,13 @@ writer = pd.ExcelWriter(fileName, engine='xlsxwriter')
 
 
 def Save(dataset):
-	for dic in dataset:
+	for dic in sorted(dataset):
 		print("-------------",dic,"-----------------")
 		labelArray = []
 		dataArray = []
 		sheetName = str(dic)
 	
-		for subdic in dataset[dic]:
+		for subdic in sorted(dataset[dic]):
 			dataArray.append(dataset[dic][subdic])
 			labelArray.append(subdic)
 		

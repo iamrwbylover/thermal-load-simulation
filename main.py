@@ -78,10 +78,10 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 			# 			self.lengthBox.value(),self.widthBox.value(),
 			# 			self.heightBox.value(),self.normVectorBox.value(),
 			# 			self.initialTempBox.value(),self.comfTempBox.value())
-			self.statusBar.showMessage("Saved.", 2000)
 			# x = sunpath.Foo()
 			# x.printf(s)
 			save.Save(self.dataset)
+			self.statusBar.showMessage("Saved.", 2000)
 		else:
 			self.close()
 			self.statusBar.showMessage("Cancelled.", 2000)
