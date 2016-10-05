@@ -4,14 +4,15 @@
 import pandas as pd 
 import datetime
 
-now = datetime.datetime.now()
-fileName = str(now)+".xlsx"
-
-writer = pd.ExcelWriter(fileName, engine='xlsxwriter')
 
 
 
 def Save(dataset):
+	now = datetime.datetime.now()
+	fileName = str(now)+".xlsx"
+
+	writer = pd.ExcelWriter(fileName, engine='xlsxwriter')
+
 	for dic in sorted(dataset):
 		labelArray = []
 		dataArray = []
@@ -24,3 +25,4 @@ def Save(dataset):
 		df.to_excel(writer, sheet_name=sheetName)
 	writer.save()
 	writer.close()
+	return fileName

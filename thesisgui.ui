@@ -1494,6 +1494,7 @@
     <property name="title">
      <string>Home</string>
     </property>
+    <addaction name="actionLoad_dataset"/>
    </widget>
    <widget class="QMenu" name="About">
     <property name="title">
@@ -1511,6 +1512,11 @@
     <enum>Qt::ActionsContextMenu</enum>
    </property>
   </widget>
+  <action name="actionLoad_dataset">
+   <property name="text">
+    <string>Load dataset...</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>latitudeBox</tabstop>

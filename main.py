@@ -69,8 +69,8 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.dataset = {'location settings':self.locationSett, 'date settings':self.dateSett, 'environmental settings':self.envSett,
 						'thermal properties':self.thermalSett, 'radiation constants':self.radConSett, 'dimension settings':self.dimensionSett,
 						'temperature settings':self.tempSett}
-			
-			save.Save(self.dataset)
+			fileName = save.Save(self.dataset)
+			print(fileName)
 			self.statusBar.showMessage("Saved.", 2000)
 		else:
 			self.close()

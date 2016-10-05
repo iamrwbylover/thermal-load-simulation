@@ -7,7 +7,7 @@ Created on Tue Apr 05 23:15:11 2016
 
 import numpy as np
 import matplotlib.pyplot as mp
-from sympy import Symbol, diff, simplify, cos, 
+from sympy import Symbol, diff, simplify, cos
 
 
 #-----------------initialization-----------------------------------------------
