@@ -52,3 +52,4 @@ def Save(dataset):
 							'Value':dataArray})
 		df.to_excel(writer, sheet_name=sheetName)
 	writer.save()
+	writer.close()
