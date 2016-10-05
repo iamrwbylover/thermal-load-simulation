@@ -14,9 +14,9 @@ def LST(lt, dummy):
 
 #function to assign values 
 def assignValues(fileName):
-    N = 4000;
-    delta = 8;
-    LSTM = 15*delta;
+    N = 4000
+    delta = 8
+    LSTM = 15*delta
     phi = np.pi/2
     yearDays = 365
 
