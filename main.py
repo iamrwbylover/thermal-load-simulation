@@ -1,7 +1,7 @@
 import sys
-import sunpath
+from Core.Calculations import sunpath
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from Database import Settings
+from Core.Database.Database import Settings
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 engine = create_engine('sqlite:///settings.sqlite', echo = True)
@@ -11,7 +11,7 @@ session = Session()
 
 
 
-mainWindowUI = "thesisgui.ui"
+mainWindowUI = "./GUI/thesisgui.ui"
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(mainWindowUI)
 
