@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Float, Time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 
@@ -7,19 +7,43 @@ from sqlalchemy import create_engine
 
     
 Base = declarative_base()
-engine = create_engine('sqlite:///users.sqlite', echo=True)
+engine = create_engine('sqlite:///settings.sqlite', echo=True)
 
-class User(Base):
-    __tablename__ = 'Users'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    fullName = Column(String)
-    password = Column(String)
+class Settings(Base):
+    __tablename__ = 'Settings'
+    #Location Settings
+    name = Column(String, primary_key=True)
+    latitude = Column(Float)
+    longitude = Column(Float)
+    altitude = Column(Float)
+    date = Column(Time)
+    swRC = Column(Float)
+    lwRC = Column(Float)
+    lwE = Column(Float)
+    #Wall properties
+    thickness = Column(Float)
+    spec_heat = Column(Float)
+    therm_cond = Column(Float)
+    conv_coeff = Column(Float)
+    density = Column(Float)
+    swAbs = Column(Float)
+    lwEWall = Column(Float)
+    #Geometry and initial variables
+    length = Column(Float)
+    width = Column(Float)
+    height = Column(Float)
+    direction = Column(Float)
+    initTemp = Column(Float)
+    comfTemp = Column(Float)
 
     def __repr__(self):
-        return "<User(name='%s', fullName = '%s', password='%s')>" %(self.name, self.fullName, self.password)
+        return "<Settings(name='%s', latitude = '%f', longitude = '%f',altitude = '%f',date = '%s',shortwave reflection coefficient = '%f',longwave reflection coefficient = '%f',longwave emissivity = '%f',)>" %(self.name,self.latitude, self.longitude, self.altitude,str(self.date), self.swRC, self.lwRC, self.lwE)
 
 
-User.__table__
+
+
+
+
+
+Settings.__table__
 Base.metadata.create_all(engine)
