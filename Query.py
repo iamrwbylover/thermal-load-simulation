@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from test import User
+from Database import User
 
 
 engine = create_engine('sqlite:///users.sqlite', echo=True)
