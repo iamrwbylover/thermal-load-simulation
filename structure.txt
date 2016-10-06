@@ -1,0 +1,19 @@
+Thesisit/
+	__init__.py
+	main.py
+	settings.sqlite
+	Core/
+		__init__.py
+		Calculation/
+			__init__.py
+			sunpath.py
+			wall_thermal.py
+		Database/
+			__init.py
+			Database.py
+			Insert.py
+			Query.py
+	Gui/
+		__init__.py
+		thesisgui.py
+		thesisgui.ui		
