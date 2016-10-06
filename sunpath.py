@@ -1,6 +1,8 @@
+# import matplotlib
+# matplotlib.use('Qt5Agg')
 import pandas as pd
 import numpy as np
-
+# from matplotlib.pyplot import plot, show
 
 
 def B(d):
@@ -96,6 +98,10 @@ def assignValues(fileName):
         azi[i] = np.arccos((np.sin(delta)*np.cos(lat)
             -np.cos(delta)*np.sin(lat)*np.cos(HRA[i]))
             /np.cos(elev[i]))
+    
+    maxAd = np.where(elev == max(elev))
+    for i in np.linspace(maxAd[0][0],N-1,N-(maxAd[0][0])):
+        azi[int(i)] = -azi[int(i)]
     file = "SunPath"+fileName
     writer = pd.ExcelWriter(file, engine='xlsxwriter')
     df = pd.DataFrame({'Elevation Angles':elev,
@@ -103,4 +109,5 @@ def assignValues(fileName):
     df.to_excel(writer, sheet_name='Sun Path Angles')
     writer.save()
     writer.close()
+    #plot(azi)
     print("It got here")

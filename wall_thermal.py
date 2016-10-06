@@ -399,18 +399,18 @@ Tain = np.array(Tain)
 
 #plots
 mp.figure(1)
-mp.plot(sp.hr, Tain-273.15,label = 'room air temperature')
-#mp.plot(sp.hr, T0-273.15,label = 'ventilation rate = 10')
-#mp.plot(sp.hr, T1-273.15,label = 'ventilation rate = 30')
-#mp.plot(sp.hr, T2-273.15,label = 'ventilation rate = 60')
-#mp.plot(sp.hr, T3-273.15,label = 'ventilation rate = 90')
-#mp.plot(sp.hr, T4-273.15,label = 'ventilation rate = 1000')
-mp.plot(sp.hr, at-273.15,'--',label = 'outside air temperature')
-mp.xticks(np.arange(0,25,1))
-mp.xlabel('hour of the day')
-mp.ylabel('C')
-mp.legend(loc = 'best')
-mp.show()
+# mp.plot(sp.hr, Tain-273.15,label = 'room air temperature')
+# #mp.plot(sp.hr, T0-273.15,label = 'ventilation rate = 10')
+# #mp.plot(sp.hr, T1-273.15,label = 'ventilation rate = 30')
+# #mp.plot(sp.hr, T2-273.15,label = 'ventilation rate = 60')
+# #mp.plot(sp.hr, T3-273.15,label = 'ventilation rate = 90')
+# #mp.plot(sp.hr, T4-273.15,label = 'ventilation rate = 1000')
+# mp.plot(sp.hr, at-273.15,'--',label = 'outside air temperature')
+# mp.xticks(np.arange(0,25,1))
+# mp.xlabel('hour of the day')
+# mp.ylabel('C')
+# mp.legend(loc = 'best')
+# mp.show()
 
 
 #----------------------------plots---------------------------------------------
@@ -465,10 +465,11 @@ class plots():
         mp.xticks(np.arange(0,25,1))
         mp.show()
             
-plot = plots()
+# plot = plots()
 
-plot.outside_wall()
+# plot.outside_wall()
 
+plots().any(sp.hr, a.azi)
 #---------------------beta----------------------------------------------------
 
 T = 300
