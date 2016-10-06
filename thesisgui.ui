@@ -45,7 +45,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QGroupBox" name="groupBox">
@@ -1477,7 +1477,7 @@
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;* with respect to the azimuth&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -1527,15 +1527,10 @@
         </item>
        </layout>
       </widget>
+      <zorder>layoutWidget</zorder>
       <zorder>TP_2</zorder>
       <zorder>RC_2</zorder>
       <zorder>label_2</zorder>
-      <zorder>label_3</zorder>
-      <zorder>lineEdit</zorder>
-      <zorder>label_3</zorder>
-      <zorder>horizontalSpacer_16</zorder>
-      <zorder>datasetName</zorder>
-      <zorder>label_3</zorder>
      </widget>
     </widget>
    </widget>

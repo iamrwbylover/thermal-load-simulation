@@ -1,7 +1,11 @@
 import sys
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-import save
-import sunpath
+from Database import Settings
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+engine = create_engine('sqlite:///settings.sqlite', echo = True)
+Session = sessionmaker(bind=engine)
+session = Session()
 
 
 mainWindowUI = "thesisgui.ui"
@@ -28,9 +32,6 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.setStatusBar(self.statusBar)
 		self.save.clicked.connect(self.saveButton)
 
-		
-
-
 
 	def goNextPage(self):
 		global i
@@ -53,26 +54,33 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		if retVal == QtWidgets.QMessageBox.Ok:
 			self.statusBar.showMessage("Saving...", 2000)
 			#data list
-			self.locationSett = {'latitude':self.latitudeBox.value(), 'longitude':self.longitudeBox.value(),
-							'altitude':self.altitudeBox.value()}
-			self.dateSett = {'date':str(self.dateEdit.date().toPyDate())}
-			self.envSett = {'swCoeff':self.swReflBox.value(), 'lwCoeff':self.lwReflBox.value(),
-						'lwEmiss':self.lwEmissBox.value()}
-			self.thermalSett = {'thickness':self.thicknessBox.value(), 'specific heat':self.spec_heatBox.value(), 'thermal conductance':self.thermal_conBox.value(),
-							'convective coefficient':self.conv_coeffBox.value(), 'density':self.densityBox.value()}
-			self.radConSett = {'shortwave absorptivity':self.short_absBox.value(), 'long wave emissivity':self.long_emissBox.value()}
-			self.dimensionSett = {'length':self.lengthBox.value(), 'width':self.widthBox.value(), 'height':self.heightBox.value(),
-								'direction':self.normVectorBox.value()}
-			self.tempSett = {'initial temperature':self.initialTempBox.value(), 'comfortable temperature':self.comfTempBox.value()}
-
-
-			self.dataset = {'location settings':self.locationSett, 'date settings':self.dateSett, 'environmental settings':self.envSett,
-						'thermal properties':self.thermalSett, 'radiation constants':self.radConSett, 'dimension settings':self.dimensionSett,
-						'temperature settings':self.tempSett}
-			fileName = save.Save(self.dataset)
-			print(fileName)
+			entry = Settings(name = self.datasetName.text(),
+							latitude = self.latitudeBox.value(),
+							longitude = self.longitudeBox.value(),
+							altitude = self.altitudeBox.value(),
+							date = str(self.dateEdit.date().toPyDate()),
+							swRC = self.swReflBox.value(),
+							lwRC = self.lwReflBox.value(),
+							lwE = self.lwEmissBox.value(),
+							thickness = self.thicknessBox.value(),
+							spec_heat = self.spec_heatBox.value(),
+							therm_cond = self.thermal_conBox.value(),
+							conv_coeff = self.conv_coeffBox.value(),
+							density = self.densityBox.value(),
+							swAbs = self.short_absBox.value(),
+							lwEWall = self.long_emissBox.value(),
+							length = self.lengthBox.value(),
+							width = self.widthBox.value(),
+							height = self.heightBox.value(),
+							direction = self.normVectorBox.value(),
+							initTemp = self.initialTempBox.value(),
+							comfTemp = self.comfTempBox.value()
+							)
+			
+			
+			session.add(entry)
+			session.commit()
 			self.statusBar.showMessage("Saved.", 2000)
-			sunpath.assignValues(fileName)
 		else:
 			self.close()
 			self.statusBar.showMessage("Cancelled.", 2000)

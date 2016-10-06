@@ -1,4 +1,3 @@
-
 from sqlalchemy import Column, Integer, String, Float, Time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -11,16 +10,14 @@ engine = create_engine('sqlite:///settings.sqlite', echo=True)
 
 class Settings(Base):
     __tablename__ = 'Settings'
-    #Location Settings
     name = Column(String, primary_key=True)
     latitude = Column(Float)
     longitude = Column(Float)
     altitude = Column(Float)
-    date = Column(Time)
+    date = Column(String)
     swRC = Column(Float)
     lwRC = Column(Float)
     lwE = Column(Float)
-    #Wall properties
     thickness = Column(Float)
     spec_heat = Column(Float)
     therm_cond = Column(Float)
@@ -28,7 +25,6 @@ class Settings(Base):
     density = Column(Float)
     swAbs = Column(Float)
     lwEWall = Column(Float)
-    #Geometry and initial variables
     length = Column(Float)
     width = Column(Float)
     height = Column(Float)

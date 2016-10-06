@@ -1,12 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from Database import User
+from Database import Settings
 
 
-engine = create_engine('sqlite:///users.sqlite', echo=True)
+engine = create_engine('sqlite:///settings.sqlite', echo=True)
 
 Session = sessionmaker(bind=engine)
 session = Session()
 
-for user in session.query(User).order_by(User.id):
-    print(user.fullName)
+for sett in session.query(Settings).filter(Settings.name=='foobar'):
+    print(sett.latitude)
