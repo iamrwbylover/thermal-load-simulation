@@ -1,4 +1,5 @@
 import sys
+import sunpath
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from Database import Settings
 from sqlalchemy.orm import sessionmaker
@@ -6,6 +7,8 @@ from sqlalchemy import create_engine
 engine = create_engine('sqlite:///settings.sqlite', echo = True)
 Session = sessionmaker(bind=engine)
 session = Session()
+
+
 
 
 mainWindowUI = "thesisgui.ui"
@@ -54,7 +57,8 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		if retVal == QtWidgets.QMessageBox.Ok:
 			self.statusBar.showMessage("Saving...", 2000)
 			#data list
-			entry = Settings(name = self.datasetName.text(),
+			fileName = self.datasetName.text()
+			entry = Settings(name = fileName,
 							latitude = self.latitudeBox.value(),
 							longitude = self.longitudeBox.value(),
 							altitude = self.altitudeBox.value(),
@@ -80,6 +84,7 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 			
 			session.add(entry)
 			session.commit()
+			sunpath.calculateSunPath(fileName)
 			self.statusBar.showMessage("Saved.", 2000)
 		else:
 			self.close()

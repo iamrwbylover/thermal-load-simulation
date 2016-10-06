@@ -2,7 +2,7 @@
 # matplotlib.use('Qt5Agg')
 import pandas as pd
 import numpy as np
-from matplotlib.pyplot import plot, show
+from matplotlib.pyplot import plot, show, legend
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Database import Settings
@@ -34,7 +34,7 @@ def calculateSunPath(fileName):
 
     for query in session.query(Settings).filter(Settings.name==fileName):
         alt = query.altitude
-        lat = query.latitude
+        lat = query.latitude*np.pi/180
         longi = query.longitude
         year = int(query.date[0:4])
         month = int(query.date[5:7])
@@ -96,19 +96,20 @@ def calculateSunPath(fileName):
             /np.cos(elev[i]))
     
     maxAd = np.where(elev == max(elev))
-    # for i in np.linspace(maxAd[0][0],N-1,N-(maxAd[0][0])):
-    #     azi[int(i)] = -azi[int(i)]
-    file = "SunPath"+fileName+'.xlsx'
+    for i in np.linspace(maxAd[0][0],N-1,N-(maxAd[0][0])):
+        azi[int(i)] = -azi[int(i)]
+    file = "SunPath-"+fileName+'.xlsx'
     writer = pd.ExcelWriter(file, engine='xlsxwriter')
     df = pd.DataFrame({'Elevation Angles':elev,
                         'Azimuthal Angles':azi})
     df.to_excel(writer, sheet_name='Sun Path Angles')
     writer.save()
     writer.close()
-    plot(azi*180/np.pi)
-    plot(elev*180/np.pi)
+    plot(azi*180/np.pi,label='azi')
+    plot(elev*180/np.pi,label='elev')
+    legend(loc = 'best')
     show()
     print("It got here")
 
 
-calculateSunPath('foo')
+calculateSunPath('sam')
