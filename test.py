@@ -5,16 +5,9 @@ from sqlalchemy import create_engine
 
 
 
-def createEngine():
-    engine = create_engine('sqlite:///users.sqlite', echo=True)
-    return engine    
-
-def createBase():
-    base = declarative_base()
-    return base
     
-Base = createBase()
-engine = createEngine
+Base = declarative_base()
+engine = create_engine('sqlite:///users.sqlite', echo=True)
 
 class User(Base):
     __tablename__ = 'Users'
