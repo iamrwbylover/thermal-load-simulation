@@ -2,7 +2,16 @@
 # matplotlib.use('Qt5Agg')
 import pandas as pd
 import numpy as np
-# from matplotlib.pyplot import plot, show
+from matplotlib.pyplot import plot, show
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from Database import Settings
+
+
+engine = create_engine('sqlite:///settings.sqlite', echo=True)
+
+Session = sessionmaker(bind=engine)
+session = Session()
 
 
 def B(d):
@@ -15,7 +24,7 @@ def LST(lt, dummy):
     return lt + dummy/60.0
 
 #function to assign values 
-def assignValues(fileName):
+def calculateSunPath(fileName):
     N = 4000
     delta = 8
     LSTM = 15*delta
@@ -23,19 +32,17 @@ def assignValues(fileName):
     yearDays = 365
 
 
-    file = pd.ExcelFile(fileName)
-    parseDate = file.parse("date settings")
-    parseLoc = file.parse("location settings")
-    Date = parseDate.to_dict()
-    Loc = parseLoc.to_dict()
-    alt = Loc['Value'][0]
-    lat = Loc['Value'][1]*np.pi/180
-    longi = Loc['Value'][2]
-    month = int(Date['Value'][0][5:7])
-    day =  int(Date['Value'][0][9:11])
+    for query in session.query(Settings).filter(Settings.name==fileName):
+        alt = query.altitude
+        lat = query.latitude
+        longi = query.longitude
+        year = int(query.date[0:4])
+        month = int(query.date[5:7])
+        day = int(query.date[9:11])
+        print(day,month,year)
     
     leap = 28
-    if float(Date['Value'][0][0:4])/4 == 0:
+    if year/4.0 == 0:
         yearDays = 366
         leap = 29
 
@@ -63,17 +70,6 @@ def assignValues(fileName):
         numDay = day + 31 + leap + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31
     elif month ==12:
         numDay = day + 31 + leap + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30
-
-
-#----functions for sunpath calculation
-    # def B(d):
-    #     return ((360.0/365)*(d-81))*np.pi/180
-
-    # def EOT(b):
-    #     return 9.87*np.sin(2*b) - 7.53*np.cos(b) - 1.5*np.sin(b)
-
-    # def LST(lt):
-    #     return lt + dummy/60.0
     
     EoT = np.zeros(yearDays)
     TC = np.zeros(yearDays)
@@ -100,14 +96,19 @@ def assignValues(fileName):
             /np.cos(elev[i]))
     
     maxAd = np.where(elev == max(elev))
-    for i in np.linspace(maxAd[0][0],N-1,N-(maxAd[0][0])):
-        azi[int(i)] = -azi[int(i)]
-    file = "SunPath"+fileName
+    # for i in np.linspace(maxAd[0][0],N-1,N-(maxAd[0][0])):
+    #     azi[int(i)] = -azi[int(i)]
+    file = "SunPath"+fileName+'.xlsx'
     writer = pd.ExcelWriter(file, engine='xlsxwriter')
     df = pd.DataFrame({'Elevation Angles':elev,
                         'Azimuthal Angles':azi})
     df.to_excel(writer, sheet_name='Sun Path Angles')
     writer.save()
     writer.close()
-    #plot(azi)
+    plot(azi*180/np.pi)
+    plot(elev*180/np.pi)
+    show()
     print("It got here")
+
+
+calculateSunPath('foo')
