@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 
     
 Base = declarative_base()
-engine = create_engine('sqlite:///settings.sqlite', echo=True)
+engine = create_engine('sqlite:///settings.sqlite', echo=False)
 
 class Settings(Base):
     __tablename__ = 'Settings'

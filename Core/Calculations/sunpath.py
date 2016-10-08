@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from Core.Database.Database import Settings
 
 
-engine = create_engine('sqlite:///settings.sqlite', echo=True)
+engine = create_engine('sqlite:///settings.sqlite', echo=False)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -105,11 +105,10 @@ def calculateSunPath(fileName):
     df.to_excel(writer, sheet_name='Sun Path Angles')
     writer.save()
     writer.close()
-    plot(azi*180/np.pi,label='azi')
-    plot(elev*180/np.pi,label='elev')
-    legend(loc = 'best')
-    show()
+    # plot(azi*180/np.pi,label='azi')
+    # plot(elev*180/np.pi,label='elev')
+    # legend(loc = 'best')
+    # show()
     print("It got here")
 
 
-#calculateSunPath('sam')

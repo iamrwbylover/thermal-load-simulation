@@ -1,5 +1,7 @@
 import numpy as np
 
+
+
 def air_temp(t):
     a0 =      29.17  
     a1 =     -2.297  
@@ -29,3 +31,4 @@ def Ilatm(t):
 
 def Ilrefl(rhol_soil,t):
     return rhol_soil*Ilatm(t)
+
