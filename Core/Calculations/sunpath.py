@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.pyplot import plot, show, legend
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from  ..Database.Database import Settings
+from Core.Database.Database import Settings
 
 
 engine = create_engine('sqlite:///settings.sqlite', echo=True)

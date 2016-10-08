@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from Core.Database.Database import Settings
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from Core.Calculations import radiation
 engine = create_engine('sqlite:///settings.sqlite', echo = True)
 Session = sessionmaker(bind=engine)
 session = Session()
