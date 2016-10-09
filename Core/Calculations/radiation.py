@@ -62,11 +62,13 @@ theta = 0
 
 
 def calculateRadiation(fileName):
+    global epsi_soil, rhol_soil, rhos_soil, azi, elev, I_dni,I_diff
     excelFile = "./Data/SunPath/SunPath-"+fileName+'.xlsx'
     excel = pd.ExcelFile(excelFile)
     sheet = excel.parse(0)
     azi = sheet.iloc[:,0].real
     elev = sheet.iloc[:,1].real
+    
 
     for sett in session.query(Settings).filter(Settings.name==fileName):
         epsi_soil = sett.lwE
@@ -93,33 +95,39 @@ def calculateRadiation(fileName):
             I_dni[i] = A*0.7**(am**0.678)
         I_diff[i] = c*I_dni[i]
 
-    plt.plot(I_dni)
-    plt.show()
-    I_1 = calculateSW(theta-np.pi/2)
-    I_2 = calculateSW(theta)
-    I_3 = calculateSW(theta+np.pi/2)
-    I_4 = calculateSW(theta+np.pi)
+    I_1 = np.empty(N)
+    I_2 = np.empty(N)
+    I_3 = np.empty(N)
+    I_4 = np.empty(N)
+
+    for i in range(N):
+        I_1[i] = calculateSW(i, theta-np.pi/2)
+        I_2[i] = calculateSW(i, theta)
+        I_3[i] = calculateSW(i, theta+np.pi/2)
+        I_4[i] = calculateSW(i, theta+np.pi)
+
     saveRadiation(fileName,I_1,I_2,I_3,I_4)
 
-def calculateSW(angle):
+def calculateSW(i, angle):
     #short wave radiation
-    I_s = np.empty(N)
-    print(angle)
-    for i in range(N):
-        I_dir[i] = I_dni[i]*np.cos(elev[i])*np.cos(angle-azi[i])
-        
-        if elev[i] < 0:
-            I_s[i] = 0
-        elif I_dir[i] <0:
-            I_dir[i] = 0
-            I_sdirh[i] = I_dni[i]*np.sin(elev[i]) + I_diff[i]
-            I_srefl[i] = rhos_soil*(I_sdirh[i] + I_diff[i])
-            I_s[i] = I_dir[i] + g_atm*I_diff[i] + g_terr*I_srefl[i]
-        else:
-            I_sdirh[i] = I_dni[i]*np.sin(elev[i]) + I_diff[i]
-            I_srefl[i] = rhos_soil*(I_sdirh[i] + I_diff[i])
-            I_s[i]= I_dir[i] + g_atm*I_diff[i] + g_terr*I_srefl[i]
-    return I_s
+    global rhos_soil, elev, azi,I_dni, I_diff
+    I_dir[i] = I_dni[i]*np.cos(elev[i])*np.cos(angle-azi[i])
+    
+    if elev[i] < 0:
+        I_s[i] = 0
+    elif I_dir[i] <0:
+        I_dir[i] = 0
+        I_sdirh[i] = I_dni[i]*np.sin(elev[i]) + I_diff[i]
+        I_srefl[i] = rhos_soil*(I_sdirh[i] + I_diff[i])
+        I_s[i] = I_dir[i] + g_atm*I_diff[i] + g_terr*I_srefl[i]
+    else:
+        I_sdirh[i] = I_dni[i]*np.sin(elev[i]) + I_diff[i]
+        I_srefl[i] = rhos_soil*(I_sdirh[i] + I_diff[i])
+        I_s[i]= I_dir[i] + g_atm*I_diff[i] + g_terr*I_srefl[i]
+    print(rhos_soil)
+    return I_s[i]
+
+    
 
 
 def saveRadiation(fileName,I_1,I_2,I_3,I_4):
