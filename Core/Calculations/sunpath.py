@@ -39,7 +39,6 @@ def calculateSunPath(fileName):
         year = int(query.date[0:4])
         month = int(query.date[5:7])
         day = int(query.date[9:11])
-        print(day,month,year)
     
     leap = 28
     if year/4.0 == 0:
@@ -109,6 +108,8 @@ def calculateSunPath(fileName):
     # plot(elev*180/np.pi,label='elev')
     # legend(loc = 'best')
     # show()
-    print("It got here")
+    print("Sunpath angles saved as excel file")
+
+
 
 

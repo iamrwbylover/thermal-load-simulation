@@ -124,7 +124,6 @@ def calculateSW(i, angle):
         I_sdirh[i] = I_dni[i]*np.sin(elev[i]) + I_diff[i]
         I_srefl[i] = rhos_soil*(I_sdirh[i] + I_diff[i])
         I_s[i]= I_dir[i] + g_atm*I_diff[i] + g_terr*I_srefl[i]
-    print(rhos_soil)
     return I_s[i]
 
     
@@ -138,12 +137,12 @@ def saveRadiation(fileName,I_1,I_2,I_3,I_4):
                         'Western':I_3,
                         'Southern':I_4,})
     df.to_excel(writer, sheet_name = 'SWRadiation')
-    plt.plot(I_1)
-    plt.plot(I_2)
-    plt.plot(I_3)
-    plt.plot(I_4)
-    plt.show()
-    print("It saved nicely")
+    # plt.plot(I_1)
+    # plt.plot(I_2)
+    # plt.plot(I_3)
+    # plt.plot(I_4)
+    # plt.show()
+    print("Shortwaved Radiation saved as excel file.")
     writer.save()
     writer.close()
     
