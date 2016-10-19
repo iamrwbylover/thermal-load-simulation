@@ -28,7 +28,7 @@ def T_sa(i, I):
     T = air_temp(hour[i])-273.15 + alpha*I(i)/h_rc - g_atm*6.5*(air_temp(hour[i]) - (25+273.15))/h_rc
 
 def thermalLoad(fileName):
-    global alpha
+    global alpha, N
     for sett in session.query(Settings).filter(Settings.name=='fileName'):
         
         length = sett.length
@@ -109,9 +109,35 @@ def thermalLoad(fileName):
     sol_airw = np.empty(N)
 
     
+    at = np.empty(N)
+
+    for i in range(N):
+        sol_airn = T_sa(i, I_sn)
+        sol_aire = T_sa(i, I_se)
+        sol_airs = T_sa(i, I_ss)
+        sol_airw = T_sa(i, I_sw)
 
 
-        
+    #heat
+    Qn = np.empty(N)
+    Qe = np.empty(N)
+    Qs = np.empty(N)
+    Qw = np.empty(N)
+
+    Qt = np.empty(N) # total heat
+    T_i = np.empty(N) 
+    T_initial = 273.15 + 25
+
+    T_i[0] = T_initial
+
+    Tn = np.empty(N)
+    Te = np.empty(N)
+    Ts = np.empty(N)
+    Tw = np.empty(N)
+
+
+
+
                 
 
 
