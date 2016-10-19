@@ -18,16 +18,25 @@ session = Session()
 N = 4000
 hour = linspace(0,24,N)
 
-
-
+alpha = 0
+h_rc = 11.0 #radiation + convection
+g_atm = 0.5
+def T_sa(i, I):
+    global alpha
+    #consider dew point here !!!
+    #!!!!!!!!!!!!!!!
+    T = air_temp(hour[i])-273.15 + alpha*I(i)/h_rc - g_atm*6.5*(air_temp(hour[i]) - (25+273.15))/h_rc
 
 def thermalLoad(fileName):
-    h_rc = 11.0 #radiation + convection
+    global alpha
     for sett in session.query(Settings).filter(Settings.name=='fileName'):
         
         length = sett.length
         width = sett.width
         height = sett.height
+        datemonth = sett.date[5:7]
+        dateday = sett.date[8:10]
+
 
         a1 = width*height
         a2 = length*height
@@ -85,8 +94,21 @@ def thermalLoad(fileName):
     S1 = C*(R0*(gamma1-gamma2)+R1*gamma2) + e1*D;
     S2 = C*(R1*(gamma1-gamma2))+ e2*D;
 
+    #call function of air and vapor pressure
 
+    excel = "Core/Data/Radiation/ShortwaveRadiation-"+fileName+".xlsx"
+    rad = pd.read_excel(excel, index_col=False)
+    I_sn = rad['Northern']
+    I_se = rad['Eastern']
+    I_ss = rad['Southtern']
+    I_sw = rad['Western']
 
+    sol_airn = np.empty(N)
+    sol_aire = np.empty(N)
+    sol_airs = np.empty(N)
+    sol_airw = np.empty(N)
+
+    
 
 
         
