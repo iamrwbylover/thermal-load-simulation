@@ -34,7 +34,7 @@ def T_sa(i, I):
 
 def T_io(i, sol_air, Ti):
     ans = np.mat([[sol_air[i]+273.15],[Ti]])
-    print(ans)
+    return ans
 
 
 def test():
@@ -138,62 +138,62 @@ def thermalLoad(fileName):
         sol_aire[i] = T_sa(i, I_se)
         sol_airs[i] = T_sa(i, I_ss)
         sol_airw[i] = T_sa(i, I_sw)
-
-    plot(sol_airn)
-    plot(sol_airs)
-    plot(sol_airw)
-    plot(sol_aire)
-    show()
-    
+ 
 
     #heat
-    # Qn = np.empty(N)
-    # Qe = np.empty(N)
-    # Qs = np.empty(N)
-    # Qw = np.empty(N)
+    Qn = np.empty(N)
+    Qe = np.empty(N)
+    Qs = np.empty(N)
+    Qw = np.empty(N)
 
-    # Qt = np.empty(N) # total heat
-    # T_i = np.empty(N) 
-    # T_initial = 273.15 + 25
+    Qt = np.empty(N) # total heat
+    T_i = np.empty(N) 
+    T_initial = 273.15 + 25
 
-    # T_i[0] = T_initial
+    T_i[0] = T_initial
 
-    # Tn = np.empty(N)
-    # Te = np.empty(N)
-    # Ts = np.empty(N)
-    # Tw = np.empty(N)
+    Tn = np.empty(N)
+    Te = np.empty(N)
+    Ts = np.empty(N)
+    Tw = np.empty(N)
 
 
-    # A_f = length*width
-    # V = A_f*height
-    # dens = 1.225 #density of air 
-    # c_a = 0.718*1000 #specific heat of air
+    A_f = length*width
+    V = A_f*height
+    dens = 1.225 #density of air 
+    c_a = 0.718*1000 #specific heat of air
 
-    # C_air = V*dens*c_a
+    C_air = V*dens*c_a
 
-    # occ = 2 # number of occupants
-    # Q = 1 #volumetric flow rate 
-    # D = occ/A_f 
-    # mu = Q*D*height/V
+    occ = 2 # number of occupants
+    Q = 1 #volumetric flow rate 
+    D = occ/A_f 
+    mu = Q*D*height/V
 
-    # for i in range(N):
-    #     Ti = T_i[i]
-    #     if i == 1:
-    #         Qn[i] = S0*T_io(1,sol_airn,Ti) + S1*T_io(1,sol_airn,Ti) + S2*T_io(1,sol_airn,Ti) - e1*Qn[1] - e2*Qn[1];
-    #         Qe[i] = S0*T_io(1,sol_aire,Ti) + S1*T_io(1,sol_aire,Ti) + S2*T_io(1,sol_aire,Ti) - e1*Qe[1] - e2*Qe[1];
-    #         Qs[i] = S0*T_io(1,sol_airs,Ti) + S1*T_io(1,sol_airs,Ti) + S2*T_io(1,sol_airs,Ti) - e1*Qs[1] - e2*Qs[1];
-    #         Qw[i] = S0*T_io(1,sol_airw,Ti) + S1*T_io(1,sol_airw,Ti) + S2*T_io(1,sol_airw,Ti) - e1*Qw[1] - e2*Qw[1];
-    #     elif i == 2:
-    #         Qn[i] = S0*T_io(i,sol_airn,Ti) + S1*T_io(i-1,sol_airn,Ti) + S2*T_io(i-1,sol_airn,Ti) - e1*Qn[i-1] -e2*Qn[i-1];
-    #         Qe[i] = S0*T_io(i,sol_aire,Ti) + S1*T_io(i-1,sol_aire,Ti) + S2*T_io(i-1,sol_aire,Ti) - e1*Qe[i-1] -e2*Qe[i-1];
-    #         Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-1,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-1];
-    #         Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-1,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-1];
-    #     else:
-    #         Qn[i] = S0*T_io(i,sol_airn,Ti) + S1*T_io(i-1,sol_airn,Ti) + S2*T_io(i-2,sol_airn,Ti) - e1*Qn[i-1] -e2*Qn[i-2];
-    #         Qe[i] = S0*T_io(i,sol_aire,Ti) + S1*T_io(i-1,sol_aire,Ti) + S2*T_io(i-2,sol_aire,Ti) - e1*Qe[i-1] -e2*Qe[i-2];
-    #         Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-2,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-2];
-    #         Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-2,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-2];
+    for i in range(N):
+        Ti = T_i[i]
+        if i == 1:
+            Qn[i] = S0*T_io(1,sol_airn,Ti) + S1*T_io(1,sol_airn,Ti) + S2*T_io(1,sol_airn,Ti) - e1*Qn[1] - e2*Qn[1];
+            Qe[i] = S0*T_io(1,sol_aire,Ti) + S1*T_io(1,sol_aire,Ti) + S2*T_io(1,sol_aire,Ti) - e1*Qe[1] - e2*Qe[1];
+            Qs[i] = S0*T_io(1,sol_airs,Ti) + S1*T_io(1,sol_airs,Ti) + S2*T_io(1,sol_airs,Ti) - e1*Qs[1] - e2*Qs[1];
+            Qw[i] = S0*T_io(1,sol_airw,Ti) + S1*T_io(1,sol_airw,Ti) + S2*T_io(1,sol_airw,Ti) - e1*Qw[1] - e2*Qw[1];
+        elif i == 2:
+            Qn[i] = S0*T_io(i,sol_airn,Ti) + S1*T_io(i-1,sol_airn,Ti) + S2*T_io(i-1,sol_airn,Ti) - e1*Qn[i-1] -e2*Qn[i-1];
+            Qe[i] = S0*T_io(i,sol_aire,Ti) + S1*T_io(i-1,sol_aire,Ti) + S2*T_io(i-1,sol_aire,Ti) - e1*Qe[i-1] -e2*Qe[i-1];
+            Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-1,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-1];
+            Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-1,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-1];
+        else:
+            Qn[i] = S0*T_io(i,sol_airn,Ti) + S1*T_io(i-1,sol_airn,Ti) + S2*T_io(i-2,sol_airn,Ti) - e1*Qn[i-1] -e2*Qn[i-2];
+            Qe[i] = S0*T_io(i,sol_aire,Ti) + S1*T_io(i-1,sol_aire,Ti) + S2*T_io(i-2,sol_aire,Ti) - e1*Qe[i-1] -e2*Qe[i-2];
+            Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-2,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-2];
+            Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-2,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-2];
                             
-    # print('Success bui')
+    print('Success bui')
+
+    plot(Qn)
+    plot(Qe)
+    plot(Qw)
+    plot(Qs)
+    show()
 
 
