@@ -188,12 +188,16 @@ def thermalLoad(fileName):
             Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-2,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-2];
             Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-2,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-2];
                             
+        Tn(i) = Qn(i)/.3 + sol_airn(i);
+        Te(i) = Qe(i)/.3 + sol_aire(i);
+        Ts(i) = Qs(i)/.3 + sol_airs(i);
+        Tw(i) = Qw(i)/.3 + sol_airw(i);
     print('Success bui')
 
-    plot(Qn)
-    plot(Qe)
-    plot(Qw)
-    plot(Qs)
+    plot(Tn)
+    plot(Te)
+    plot(Tw)
+    plot(Ts)
     show()
 
 
