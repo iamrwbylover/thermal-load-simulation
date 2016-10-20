@@ -15,9 +15,11 @@ engine = create_engine('sqlite:///settings.sqlite', echo=True)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+nOfDays = 1
+
 
 N = 4000
-hour = np.linspace(0,24,N)
+hour = np.linspace(0,nOfDays*24,N)
 
 alpha = 0
 h_rc = 11.0 #radiation + convection
@@ -148,9 +150,9 @@ def thermalLoad(fileName):
 
     Qt = np.empty(N) # total heat
     T_i = np.empty(N) 
-    T_initial = 273.15 + 25
+    Ti = 273.15 + 25 #set temperature
 
-    T_i[0] = T_initial
+    T_i[0] = Ti
 
     Tn = np.empty(N)
     Te = np.empty(N)
@@ -171,7 +173,6 @@ def thermalLoad(fileName):
     mu = Q*D*height/V
 
     for i in range(N):
-        Ti = T_i[i]
         if i == 1:
             Qn[i] = S0*T_io(1,sol_airn,Ti) + S1*T_io(1,sol_airn,Ti) + S2*T_io(1,sol_airn,Ti) - e1*Qn[1] - e2*Qn[1];
             Qe[i] = S0*T_io(1,sol_aire,Ti) + S1*T_io(1,sol_aire,Ti) + S2*T_io(1,sol_aire,Ti) - e1*Qe[1] - e2*Qe[1];
@@ -188,10 +189,10 @@ def thermalLoad(fileName):
             Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-2,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-2];
             Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-2,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-2];
                             
-        Tn(i) = Qn(i)/.3 + sol_airn(i);
-        Te(i) = Qe(i)/.3 + sol_aire(i);
-        Ts(i) = Qs(i)/.3 + sol_airs(i);
-        Tw(i) = Qw(i)/.3 + sol_airw(i);
+        Tn[i] = Qn[i]/.3 + Ti - 273.15
+        Te[i] = Qe[i]/.3 + Ti - 273.15
+        Ts[i] = Qs[i]/.3 + Ti- 273.15
+        Tw[i] = Qw[i]/.3 + Ti- 273.15
     print('Success bui')
 
     plot(Tn)
