@@ -124,11 +124,6 @@ def thermalLoad(fileName):
     I_sw = rad['Western']
 
     
-    plot(I_ss)
-    plot(I_sw)
-    plot(I_se)
-    plot(I_sn)
-    show()
 
     sol_airn = np.empty(N)
     sol_aire = np.empty(N)
@@ -144,10 +139,11 @@ def thermalLoad(fileName):
         sol_airs[i] = T_sa(i, I_ss)
         sol_airw[i] = T_sa(i, I_sw)
 
-    # plot(sol_airn)
-    # plot(sol_airs)
-    # plot(sol_airw)
-    # show()
+    plot(sol_airn)
+    plot(sol_airs)
+    plot(sol_airw)
+    plot(sol_aire)
+    show()
     
 
     #heat
