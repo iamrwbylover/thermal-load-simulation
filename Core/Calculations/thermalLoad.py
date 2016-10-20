@@ -3,7 +3,7 @@ import numpy as np
 from scipy.linalg import expm, inv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from Database import Settings
+from Core.Database.Database import Settings
 
 from Core.Calculations.Functions import air_temp
 
@@ -16,7 +16,7 @@ session = Session()
 
 
 N = 4000
-hour = linspace(0,24,N)
+hour = np.linspace(0,24,N)
 
 alpha = 0
 h_rc = 11.0 #radiation + convection
@@ -25,12 +25,17 @@ def T_sa(i, I):
     global alpha
     #consider dew point here !!!
     #!!!!!!!!!!!!!!!
-    T = air_temp(hour[i])-273.15 + alpha*I(i)/h_rc - g_atm*6.5*(air_temp(hour[i]) - (25+273.15))/h_rc
+    T = air_temp(hour[i])-273.15 + alpha*I[i]/h_rc - g_atm*6.5*(air_temp(hour[i]) - (25+273.15))/h_rc
+
+def T_io(i, sol_air, Ti):
+    ans = np.mat([[sol_air[i]+273.15],[Ti]])
+    print(ans)
+
 
 def thermalLoad(fileName):
     global alpha, N
-    for sett in session.query(Settings).filter(Settings.name=='fileName'):
-        
+    for sett in session.query(Settings).filter(Settings.name==fileName):
+        print('here')
         length = sett.length
         width = sett.width
         height = sett.height
@@ -53,7 +58,8 @@ def thermalLoad(fileName):
         
         alpha = sett.swAbs
         epsi = sett.lwEWall
-        sigma = 5.67*1)**(-8)
+        sigma = 5.67*(10)**(-8)
+
 
     a11 = -1/(R*Cc) - h_rc/(Cc);
     a12 = 1/(R*Cc);
@@ -71,12 +77,12 @@ def thermalLoad(fileName):
     d11 = 0;
     d12 = -h_c;
 
-    A = np.mat('a11 a12; a21 a22')
-    B = np.mat('b11 b12; b21 b22')
-    C = np.mat('c11 c12')
-    D = np.mat('d11 d12')
+    A = np.mat([[a11,a12],[a21,a22]])
+    B = np.mat([[b11,b12],[b21,b22]])
+    C = np.mat([c11,c12])
+    D = np.mat([d11,d12])
 
-    I = np.mat('1 0;0 1')
+    I = np.mat([[1,0],[0,1]])
     
     delta = 3600*(24/N)
     
@@ -96,11 +102,11 @@ def thermalLoad(fileName):
 
     #call function of air and vapor pressure
 
-    excel = "Core/Data/Radiation/ShortwaveRadiation-"+fileName+".xlsx"
+    excel = "Data/Radiation/ShortwaveRadiation-"+fileName+".xlsx"
     rad = pd.read_excel(excel, index_col=False)
     I_sn = rad['Northern']
     I_se = rad['Eastern']
-    I_ss = rad['Southtern']
+    I_ss = rad['Southern']
     I_sw = rad['Western']
 
     sol_airn = np.empty(N)
@@ -136,9 +142,36 @@ def thermalLoad(fileName):
     Tw = np.empty(N)
 
 
+    A_f = length*width
+    V = A_f*height
+    dens = 1.225 #density of air 
+    c_a = 0.718*1000 #specific heat of air
 
+    C_air = V*dens*c_a
 
-                
+    occ = 2 # number of occupants
+    Q = 1 #volumetric flow rate 
+    D = occ/A_f 
+    mu = Q*D*height/V
 
+    for i in range(N):
+        Ti = T_i[i]
+        if i == 1:
+            Qn[i] = S0*T_io(1,sol_airn,Ti) + S1*T_io(1,sol_airn,Ti) + S2*T_io(1,sol_airn,Ti) - e1*Qn[1] - e2*Qn[1];
+            Qe[i] = S0*T_io(1,sol_aire,Ti) + S1*T_io(1,sol_aire,Ti) + S2*T_io(1,sol_aire,Ti) - e1*Qe[1] - e2*Qe[1];
+            Qs[i] = S0*T_io(1,sol_airs,Ti) + S1*T_io(1,sol_airs,Ti) + S2*T_io(1,sol_airs,Ti) - e1*Qs[1] - e2*Qs[1];
+            Qw[i] = S0*T_io(1,sol_airw,Ti) + S1*T_io(1,sol_airw,Ti) + S2*T_io(1,sol_airw,Ti) - e1*Qw[1] - e2*Qw[1];
+        elif i == 2:
+            Qn[i] = S0*T_io(i,sol_airn,Ti) + S1*T_io(i-1,sol_airn,Ti) + S2*T_io(i-1,sol_airn,Ti) - e1*Qn[i-1] -e2*Qn[i-1];
+            Qe[i] = S0*T_io(i,sol_aire,Ti) + S1*T_io(i-1,sol_aire,Ti) + S2*T_io(i-1,sol_aire,Ti) - e1*Qe[i-1] -e2*Qe[i-1];
+            Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-1,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-1];
+            Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-1,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-1];
+        else:
+            Qn[i] = S0*T_io(i,sol_airn,Ti) + S1*T_io(i-1,sol_airn,Ti) + S2*T_io(i-2,sol_airn,Ti) - e1*Qn[i-1] -e2*Qn[i-2];
+            Qe[i] = S0*T_io(i,sol_aire,Ti) + S1*T_io(i-1,sol_aire,Ti) + S2*T_io(i-2,sol_aire,Ti) - e1*Qe[i-1] -e2*Qe[i-2];
+            Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-2,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-2];
+            Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-2,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-2];
+                            
+    print('Success bui')
 
 

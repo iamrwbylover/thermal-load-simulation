@@ -5,6 +5,7 @@ from Core.Database.Database import Settings
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from Core.Calculations import radiation
+from Core.Calculations import thermalLoad
 engine = create_engine('sqlite:///settings.sqlite', echo = False)
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -87,6 +88,7 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 			session.commit()
 			sunpath.calculateSunPath(fileName)
 			radiation.calculateRadiation(fileName)
+			thermalLoad.thermalLoad(fileName)
 			self.statusBar.showMessage("Saved.", 2000)
 		else:
 			self.close()
