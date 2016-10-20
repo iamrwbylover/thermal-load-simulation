@@ -26,15 +26,23 @@ def T_sa(i, I):
     global alpha
     #consider dew point here !!!
     #!!!!!!!!!!!!!!!
+    
     T = air_temp(hour[i])-273.15 + alpha*I[i]/h_rc - g_atm*6.5*(air_temp(hour[i]) - (25+273.15))/h_rc
+    if i == 3900:
+        print(T)
+    return T
 
 def T_io(i, sol_air, Ti):
     ans = np.mat([[sol_air[i]+273.15],[Ti]])
     print(ans)
 
 
+def test():
+    print('meron naman')
+
 def thermalLoad(fileName):
     global alpha, N
+    print(fileName, 'yow')
     for sett in session.query(Settings).filter(Settings.name==fileName):
         print('here')
         length = sett.length
@@ -61,7 +69,6 @@ def thermalLoad(fileName):
         epsi = sett.lwEWall
         sigma = 5.67*(10)**(-8)
 
-
     a11 = -1/(R*Cc) - h_rc/(Cc);
     a12 = 1/(R*Cc);
     a21 = 1/(R*Cc);
@@ -82,6 +89,12 @@ def thermalLoad(fileName):
     B = np.mat([[b11,b12],[b21,b22]])
     C = np.mat([c11,c12])
     D = np.mat([d11,d12])
+
+    print(A)
+    print(B)
+    print(C)
+    print(D)
+
 
     I = np.mat([[1,0],[0,1]])
     
@@ -104,31 +117,40 @@ def thermalLoad(fileName):
     #call function of air and vapor pressure
 
     excel = "Data/Radiation/ShortwaveRadiation-"+fileName+".xlsx"
-    rad = pd.read_excel(excel, index_col=False)
+    rad = pd.read_excel(excel)
     I_sn = rad['Northern']
     I_se = rad['Eastern']
     I_ss = rad['Southern']
     I_sw = rad['Western']
 
+    
+    plot(I_ss)
+    plot(I_sw)
+    plot(I_se)
     plot(I_sn)
     show()
 
-    # sol_airn = np.empty(N)
-    # sol_aire = np.empty(N)
-    # sol_airs = np.empty(N)
-    # sol_airw = np.empty(N)
+    sol_airn = np.empty(N)
+    sol_aire = np.empty(N)
+    sol_airs = np.empty(N)
+    sol_airw = np.empty(N)
 
     
-    # at = np.empty(N)
+    at = np.empty(N)
 
-    # for i in range(N):
-    #     sol_airn = T_sa(i, I_sn)
-    #     sol_aire = T_sa(i, I_se)
-    #     sol_airs = T_sa(i, I_ss)
-    #     sol_airw = T_sa(i, I_sw)
+    for i in range(N):
+        sol_airn[i] = T_sa(i, I_sn)
+        sol_aire[i] = T_sa(i, I_se)
+        sol_airs[i] = T_sa(i, I_ss)
+        sol_airw[i] = T_sa(i, I_sw)
 
+    # plot(sol_airn)
+    # plot(sol_airs)
+    # plot(sol_airw)
+    # show()
+    
 
-    # #heat
+    #heat
     # Qn = np.empty(N)
     # Qe = np.empty(N)
     # Qs = np.empty(N)
