@@ -172,10 +172,11 @@ def thermalLoad(fileName):
 
 
     figure(1)
-    plot(T2n-273.15)
-    plot(T2e-273.15)
-    plot(T2w-273.15)
-    plot(T2s-273.15)
+    # plot(T2n-273.15)
+    # plot(T2e-273.15)
+    # plot(T2w-273.15)
+    # plot(T2s-273.15)
+    plot(Tair-273.15)
     plot(at-273.15)
     show()
     figure(2)
