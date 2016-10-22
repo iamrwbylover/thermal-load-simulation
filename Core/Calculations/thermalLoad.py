@@ -49,6 +49,8 @@ def thermalLoad(fileName):
         c = sett.spec_heat
         k = sett.therm_cond
         
+        Ti = sett.initTemp
+        Tcomf = sett.comfTemp
             
         alpha = sett.swAbs
         epsi = sett.lwEWall
@@ -89,7 +91,6 @@ def thermalLoad(fileName):
     Qw = np.empty(N)
 
     Qt = np.empty(N) # total heat
-    Ti = 25 #set temperature
 
     T1n = np.empty(N)
     T2n = np.empty(N)
@@ -100,13 +101,13 @@ def thermalLoad(fileName):
     T1w = np.empty(N)
     T2w = np.empty(N)
 
-    T1n[0] = 273.15 + 26
+    T1n[0] = 273.15 + Ti
     T2n[0] = 273.15 + Ti
-    T1e[0] = 273.15 + 26
+    T1e[0] = 273.15 + Ti
     T2e[0] = 273.15 + Ti
-    T1s[0] = 273.15 + 26
+    T1s[0] = 273.15 + Ti
     T2s[0] = 273.15 + Ti
-    T1w[0] = 273.15 + 26
+    T1w[0] = 273.15 + Ti
     T2w[0] = 273.15 + Ti
 
     Tair = np.empty(N)
@@ -178,9 +179,6 @@ def thermalLoad(fileName):
     # plot(T2s-273.15)
     plot(Tair-273.15)
     plot(at-273.15)
-    show()
-    figure(2)
-    plot(Q)
     show()
 
     
