@@ -71,50 +71,6 @@ def thermalLoad(fileName):
         epsi = sett.lwEWall
         sigma = 5.67*(10)**(-8)
 
-    a11 = -1/(R*Cc) - h_rc/(Cc);
-    a12 = 1/(R*Cc);
-    a21 = 1/(R*Cc);
-    a22 = -1/(R*Cc) - h_c/(Cc);
-
-    b11 = h_rc/(Cc);
-    b12 = 0;
-    b21 = 0;
-    b22 = h_c/(Cc);
-
-    c11 = 0;
-    c12 = h_c;
-
-    d11 = 0;
-    d12 = -h_c;
-
-    A = np.mat([[a11,a12],[a21,a22]])
-    B = np.mat([[b11,b12],[b21,b22]])
-    C = np.mat([c11,c12])
-    D = np.mat([d11,d12])
-
-    print(A)
-    print(B)
-    print(C)
-    print(D)
-
-
-    I = np.mat([[1,0],[0,1]])
-    
-    delta = 3600*(24/N)
-    
-    phi = expm(A*delta)
-
-    gamma1 = inv(A)*(phi-I)*B;
-    gamma2 = inv(A)*(gamma1/delta - B);
-
-    R0 = I
-    e1 = -np.trace(phi*R0)/1
-    R1 = phi*R0 + e1*I 
-    e2 = -np.trace(phi*R1)/2
-
-    S0 = C*R0*gamma2 + D;
-    S1 = C*(R0*(gamma1-gamma2)+R1*gamma2) + e1*D;
-    S2 = C*(R1*(gamma1-gamma2))+ e2*D;
 
     #call function of air and vapor pressure
 
@@ -149,56 +105,79 @@ def thermalLoad(fileName):
     Qw = np.empty(N)
 
     Qt = np.empty(N) # total heat
-    T_i = np.empty(N) 
     Ti = 273.15 + 25 #set temperature
 
-    T_i[0] = Ti
+    T1n = np.empty(N)
+    T2n = np.empty(N)
+    T1e = np.empty(N)
+    T2e = np.empty(N)
+    T1s = np.empty(N)
+    T2s = np.empty(N)
+    T1w = np.empty(N)
+    T2w = np.empty(N)
 
-    Tn = np.empty(N)
-    Te = np.empty(N)
-    Ts = np.empty(N)
-    Tw = np.empty(N)
+    T1n[0] = 273.15 + Ti
+    T2n[0] = 273.15 + Ti
+    T1e[0] = 273.15 + Ti
+    T2e[0] = 273.15 + Ti
+    T1s[0] = 273.15 + Ti
+    T2s[0] = 273.15 + Ti
+    T1w[0] = 273.15 + Ti
+    T2w[0] = 273.15 + Ti
+
+    Tair = np.empty(N)
+    Tair[0] = 273.15 + Ti
+
+    s = 3600*(24/N)
+
+
 
 
     A_f = length*width
     V = A_f*height
     dens = 1.225 #density of air 
     c_a = 0.718*1000 #specific heat of air
-
     C_air = V*dens*c_a
 
-    occ = 2 # number of occupants
-    Q = 1 #volumetric flow rate 
-    D = occ/A_f 
-    mu = Q*D*height/V
+    dv = 0.1 #m3/s
+    dm1 = dens*dv #kg/s
+    m1 = s*dm1 #kg
 
-    for i in range(N):
-        if i == 1:
-            Qn[i] = S0*T_io(1,sol_airn,Ti) + S1*T_io(1,sol_airn,Ti) + S2*T_io(1,sol_airn,Ti) - e1*Qn[1] - e2*Qn[1];
-            Qe[i] = S0*T_io(1,sol_aire,Ti) + S1*T_io(1,sol_aire,Ti) + S2*T_io(1,sol_aire,Ti) - e1*Qe[1] - e2*Qe[1];
-            Qs[i] = S0*T_io(1,sol_airs,Ti) + S1*T_io(1,sol_airs,Ti) + S2*T_io(1,sol_airs,Ti) - e1*Qs[1] - e2*Qs[1];
-            Qw[i] = S0*T_io(1,sol_airw,Ti) + S1*T_io(1,sol_airw,Ti) + S2*T_io(1,sol_airw,Ti) - e1*Qw[1] - e2*Qw[1];
-        elif i == 2:
-            Qn[i] = S0*T_io(i,sol_airn,Ti) + S1*T_io(i-1,sol_airn,Ti) + S2*T_io(i-1,sol_airn,Ti) - e1*Qn[i-1] -e2*Qn[i-1];
-            Qe[i] = S0*T_io(i,sol_aire,Ti) + S1*T_io(i-1,sol_aire,Ti) + S2*T_io(i-1,sol_aire,Ti) - e1*Qe[i-1] -e2*Qe[i-1];
-            Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-1,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-1];
-            Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-1,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-1];
-        else:
-            Qn[i] = S0*T_io(i,sol_airn,Ti) + S1*T_io(i-1,sol_airn,Ti) + S2*T_io(i-2,sol_airn,Ti) - e1*Qn[i-1] -e2*Qn[i-2];
-            Qe[i] = S0*T_io(i,sol_aire,Ti) + S1*T_io(i-1,sol_aire,Ti) + S2*T_io(i-2,sol_aire,Ti) - e1*Qe[i-1] -e2*Qe[i-2];
-            Qs[i] = S0*T_io(i,sol_airs,Ti) + S1*T_io(i-1,sol_airs,Ti) + S2*T_io(i-2,sol_airs,Ti) - e1*Qs[i-1] -e2*Qs[i-2];
-            Qw[i] = S0*T_io(i,sol_airw,Ti) + S1*T_io(i-1,sol_airw,Ti) + S2*T_io(i-2,sol_airw,Ti) - e1*Qw[i-1] -e2*Qw[i-2];
-                            
-        Tn[i] = Qn[i]/.3 + Ti - 273.15
-        Te[i] = Qe[i]/.3 + Ti - 273.15
-        Ts[i] = Qs[i]/.3 + Ti- 273.15
-        Tw[i] = Qw[i]/.3 + Ti- 273.15
+    dve = 0.05 #m3/s
+    ve = s*dve #m3 
+    me = dens*ve #kg
+
+    Q = np.empty(N)
+    Q[0] = 0
+
+    Tc = np.empty(N)
+    Tc[0] = Tair[0]
+
+    dm1dmt = np.empty(N)
+    dm1dt[0] = dm1
+
+    inputTemp = 25
+    ac_min = 18
+
+    shift = False
+
+
+    for i in range(N-1):
+        T1n[i+1] = T1n[i] + s*(h_rc*((sol_airn[i]+273.15) - T1n[i])/Cc + (T2n[i]-T1n[i])/(R*Cc));
+        T2n[i+1] = T2n[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2n[i]-T1n[i])/(R*Cc));
+        T1e[i+1] = T1e[i] + s*(h_rc*((sol_aire[i]+273.15) - T1e[i])/Cc + (T2e[i]-T1e[i])/(R*Cc));
+        T2e[i+1] = T2e[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2e[i]-T1e[i])/(R*Cc));
+        T1s[i+1] = T1s[i] + s*(h_rc*((sol_airs[i]+273.15) - T1s[i])/Cc + (T2s[i]-T1s[i])/(R*Cc));
+        T2s[i+1] = T2s[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2s[i]-T1s[i])/(R*Cc));
+        T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc));
+        T2w[i+1] = T2w[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
+
+        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n(1,i)-Tair(1,i))+ae*(T2e(1,i)-Tair(1,i))+as*(T2s(1,i)-Tair(1,i))+aw*(T2w(1,i)-Tair(1,i)))/(C_air + m1*c_a-me*c_a) - c_a*dm1*(Tair[i]-Tc[i+1])/(C_air + m1*c_a-me*c_a)); + s*10*(290.15-Tair(1,i))/C_air;; + s*1.4*A_w*((at(1,i)+273.15)-Tair(1,i))/C_air - s*800/C_air ;
+        Q[i+1] = c_a*dm1*(Tair[i]-Tc[i+1]) + m1*c_a*(Tair[i+1]-Tair[i])/s;                
+
     print('Success bui')
 
-    plot(Tn)
-    plot(Te)
-    plot(Tw)
-    plot(Ts)
+    plot(Tair-273.15)
     show()
 
 
