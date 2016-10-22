@@ -32,6 +32,8 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.oneNext_2.clicked.connect(self.goNextPage)
 		self.twoBack_2.clicked.connect(self.goPreviousPage)
 
+
+		menu = QtGui.QMenu()
 		
 		self.statusBar = QtWidgets.QStatusBar()
 		self.setStatusBar(self.statusBar)
