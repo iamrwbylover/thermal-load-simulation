@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from matplotlib.pyplot import plot, show
+from matplotlib.pyplot import plot, show, figure
 from scipy.linalg import expm, inv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -21,57 +21,41 @@ nOfDays = 1
 N = 4000
 hour = np.linspace(0,nOfDays*24,N)
 
-alpha = 0
 h_rc = 11.0 #radiation + convection
 g_atm = 0.5
 def T_sa(i, I):
-    global alpha
+    global h_rc
     #consider dew point here !!!
     #!!!!!!!!!!!!!!!
     
     T = air_temp(hour[i])-273.15 + alpha*I[i]/h_rc - g_atm*6.5*(air_temp(hour[i]) - (25+273.15))/h_rc
-    if i == 3900:
-        print(T)
     return T
-
-def T_io(i, sol_air, Ti):
-    ans = np.mat([[sol_air[i]+273.15],[Ti]])
-    return ans
-
-
-def test():
-    print('meron naman')
 
 def thermalLoad(fileName):
     global alpha, N
-    print(fileName, 'yow')
     for sett in session.query(Settings).filter(Settings.name==fileName):
-        print('here')
+
         length = sett.length
         width = sett.width
         height = sett.height
-        datemonth = sett.date[5:7]
-        dateday = sett.date[8:10]
+        # datemonth = sett.date[5:7]
+        # dateday = sett.date[8:10]
 
 
-        a1 = width*height
-        a2 = length*height
-        a3 = width*height
-        a4 = length*height
-        
+        #material properties
         thickness = sett.thickness
         h_c = sett.conv_coeff
         rho = sett.density
         c = sett.spec_heat
         k = sett.therm_cond
-        R = thickness/k
-        Cc = rho*c*thickness/2
         
+            
         alpha = sett.swAbs
         epsi = sett.lwEWall
         sigma = 5.67*(10)**(-8)
-
-
+    
+    R = thickness/k
+    Cc = rho*c*thickness/2
     #call function of air and vapor pressure
 
     excel = "Data/Radiation/ShortwaveRadiation-"+fileName+".xlsx"
@@ -96,7 +80,7 @@ def thermalLoad(fileName):
         sol_aire[i] = T_sa(i, I_se)
         sol_airs[i] = T_sa(i, I_ss)
         sol_airw[i] = T_sa(i, I_sw)
- 
+        at[i] = air_temp(hour[i])
 
     #heat
     Qn = np.empty(N)
@@ -105,7 +89,7 @@ def thermalLoad(fileName):
     Qw = np.empty(N)
 
     Qt = np.empty(N) # total heat
-    Ti = 273.15 + 25 #set temperature
+    Ti = 25 #set temperature
 
     T1n = np.empty(N)
     T2n = np.empty(N)
@@ -116,13 +100,13 @@ def thermalLoad(fileName):
     T1w = np.empty(N)
     T2w = np.empty(N)
 
-    T1n[0] = 273.15 + Ti
+    T1n[0] = 273.15 + 26
     T2n[0] = 273.15 + Ti
-    T1e[0] = 273.15 + Ti
+    T1e[0] = 273.15 + 26
     T2e[0] = 273.15 + Ti
-    T1s[0] = 273.15 + Ti
+    T1s[0] = 273.15 + 26
     T2s[0] = 273.15 + Ti
-    T1w[0] = 273.15 + Ti
+    T1w[0] = 273.15 + 26
     T2w[0] = 273.15 + Ti
 
     Tair = np.empty(N)
@@ -130,7 +114,10 @@ def thermalLoad(fileName):
 
     s = 3600*(24/N)
 
-
+    an = width*height
+    ae = length*height
+    aS = width*height
+    aw = length*width
 
 
     A_f = length*width
@@ -153,7 +140,7 @@ def thermalLoad(fileName):
     Tc = np.empty(N)
     Tc[0] = Tair[0]
 
-    dm1dmt = np.empty(N)
+    dm1dt = np.empty(N)
     dm1dt[0] = dm1
 
     inputTemp = 25
@@ -172,12 +159,27 @@ def thermalLoad(fileName):
         T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc));
         T2w[i+1] = T2w[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
 
-        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n(1,i)-Tair(1,i))+ae*(T2e(1,i)-Tair(1,i))+as*(T2s(1,i)-Tair(1,i))+aw*(T2w(1,i)-Tair(1,i)))/(C_air + m1*c_a-me*c_a) - c_a*dm1*(Tair[i]-Tc[i+1])/(C_air + m1*c_a-me*c_a)); + s*10*(290.15-Tair(1,i))/C_air;; + s*1.4*A_w*((at(1,i)+273.15)-Tair(1,i))/C_air - s*800/C_air ;
+        if dm1 != 0 and shift == False:
+          Tc[i+1] = Tair[i] - h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*dm1);
+          if Tc[i+1] < (273.15+ac_min):
+              Tc[i+1] = 273.15+ac_min;
+              dm1 = h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*(Tair[i]-Tc[i+1]));
+
+        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(C_air + m1*c_a-me*c_a)) #- c_a*dm1*(Tair[i]-Tc[i+1])/(C_air + m1*c_a-me*c_a))# + s*10*(290.15-Tair[i])/C_air #+ s*1.4*A_w*((at[i]+273.15)-Tair[i])/C_air - s*800/C_air ;
         Q[i+1] = c_a*dm1*(Tair[i]-Tc[i+1]) + m1*c_a*(Tair[i+1]-Tair[i])/s;                
 
-    print('Success bui')
+    
 
-    plot(Tair-273.15)
+
+    figure(1)
+    plot(T2n-273.15)
+    plot(T2e-273.15)
+    plot(T2w-273.15)
+    plot(T2s-273.15)
+    plot(at-273.15)
+    show()
+    figure(2)
+    plot(Q)
     show()
 
-
+    
