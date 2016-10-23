@@ -32,13 +32,24 @@ class Load(QtWidgets.QDialog, load):
 		self.populate()
 		
 	def loadIt(self,i):
-		global items
 		fileName = self.cb.currentText()
-		print(fileName)
-		self.close()
-		thermalLoad.thermalLoad(fileName)
+		msg = QtWidgets.QMessageBox()
+		msg.setIcon(QtWidgets.QMessageBox.Question)
+
+		msg.setText("Load dataset {}?".format(fileName))
+		msg.setWindowTitle("Load")
+		msg.setStandardButtons(QtWidgets.QMessageBox.Ok| QtWidgets.QMessageBox.Cancel)
+
+		retVal = msg.exec_()
+		
+		if retVal == QtWidgets.QMessageBox.Ok:
+			self.close()
+			thermalLoad.thermalLoad(fileName)		
+		else:
+			msg.close()
 		
 	def populate(self):
+		global items
 		for sett in session.query(Settings).filter():
 			if sett.name not in items:
 				self.cb.addItem(sett.name)
@@ -127,7 +138,6 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 			thermalLoad.thermalLoad(fileName)
 			self.load.populate()
 		else:
-			self.close()
 			self.statusBar.showMessage("Cancelled.", 2000)
 
 
