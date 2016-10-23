@@ -1,6 +1,6 @@
 import sys
 from Core.Calculations import sunpath
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
+from PyQt5 import uic, QtWidgets
 from Core.Database.Database import Settings
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
