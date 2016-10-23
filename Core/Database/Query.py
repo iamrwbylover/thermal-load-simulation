@@ -8,5 +8,5 @@ engine = create_engine('sqlite:///home/bisgetti/Documents/Thesisit/settings.sqli
 Session = sessionmaker(bind=engine)
 session = Session()
 
-for sett in session.query(Settings).filter(Settings.name=='foo'):
-    print(sett.date[5:])
+for sett in session.query(Settings):
+    print(name)

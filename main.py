@@ -13,14 +13,39 @@ session = Session()
 
 
 
+items = []
+
 mainWindowUI = "./GUI/thesisgui.ui"
-
+loader = "./GUI/load.ui"
 Ui_MainWindow, QtBaseClass = uic.loadUiType(mainWindowUI)
-
+load, QtBaseClass2 = uic.loadUiType(loader)
 
 i = 0
-class First(QtWidgets.QMainWindow, Ui_MainWindow):
+class Load(QtWidgets.QDialog, load):
 	def __init__(self):
+		QtWidgets.QDialog.__init__(self)
+		load.__init__(self)
+		self.setupUi(self)
+		self.cb = self.load
+
+		self.cb.activated.connect(self.loadIt)
+		self.populate()
+		
+	def loadIt(self,i):
+		global items
+		fileName = self.cb.currentText()
+		print(fileName)
+		self.close()
+		thermalLoad.thermalLoad(fileName)
+		
+	def populate(self):
+		for sett in session.query(Settings).filter():
+			if sett.name not in items:
+				self.cb.addItem(sett.name)
+				items.append(sett.name)
+
+class First(QtWidgets.QMainWindow, Ui_MainWindow):
+	def __init__(self, parent=None):
 
 		QtWidgets.QMainWindow.__init__(self)
 		Ui_MainWindow.__init__(self)
@@ -33,12 +58,20 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.twoBack_2.clicked.connect(self.goPreviousPage)
 
 
-		menu = QtGui.QMenu()
+
+		home = self.Home
+		home.triggered.connect(self.Home1)
 		
 		self.statusBar = QtWidgets.QStatusBar()
 		self.setStatusBar(self.statusBar)
 		self.save.clicked.connect(self.saveButton)
 
+		self.load = Load()
+
+
+	def Home1(self):
+		self.load.show()
+		
 
 	def goNextPage(self):
 		global i
@@ -88,15 +121,14 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 			
 			session.add(entry)
 			session.commit()
-			sunpath.calculateSunPath(fileName)
+			sunpath.calculateSunPath(fileName)	
 			radiation.calculateRadiation(fileName)
-			thermalLoad.thermalLoad(fileName)
 			self.statusBar.showMessage("Saved.", 2000)
+			thermalLoad.thermalLoad(fileName)
+			self.load.populate()
 		else:
 			self.close()
 			self.statusBar.showMessage("Cancelled.", 2000)
-
-
 
 
 if __name__ == "__main__":
