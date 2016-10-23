@@ -15,11 +15,11 @@ engine = create_engine('sqlite:///settings.sqlite', echo=True)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-nOfDays = 1
+noOfDays = 5
 
 
-N = 4000
-hour = np.linspace(0,nOfDays*24,N)
+N = noOfDays*1000
+hour = np.linspace(0,noOfDays*24,N)
 
 h_rc = 11.0 #radiation + convection
 g_atm = 0.5
@@ -173,11 +173,15 @@ def thermalLoad(fileName):
 
 
     figure(1)
-    # plot(T2n-273.15)
-    # plot(T2e-273.15)
-    # plot(T2w-273.15)
-    # plot(T2s-273.15)
-    plot(Tair-273.15)
+    plot(T2n-273.15)
+    plot(T2e-273.15)
+    plot(T2w-273.15)
+    plot(T2s-273.15)
+    # plot(Tair-273.15)
+    # plot(sol_airn)
+    # plot(sol_aire)
+    # plot(sol_airw)
+    # plot(sol_aire)
     plot(at-273.15)
     show()
 

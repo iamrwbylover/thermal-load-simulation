@@ -12,10 +12,12 @@ engine = create_engine('sqlite:///settings.sqlite', echo=False)
 
 Session = sessionmaker(bind=engine)
 session = Session()
-N = 4000
+
+noOfDays=5
+N = noOfDays*1000
 
 
-hr = np.linspace(0,24,N)
+hr = np.linspace(0,noOfDays*24,N)
 I_cloud = np.zeros(N)
 I_latm = np.empty(N)
 I_lterr = np.empty(N)
@@ -86,6 +88,7 @@ def calculateRadiation(fileName):
     #     I_l[i] = g_atm*I_latm[i] + g_terr*(I_lterr[i] + I_lrefl[i])    
 
     #direct normal irradiance plus diffused
+
     for i in range(N):
         if elev[i] < 0:
             I_dni[i] = 0
