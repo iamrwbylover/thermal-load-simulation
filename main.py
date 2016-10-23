@@ -4,8 +4,7 @@ from PyQt5 import uic, QtWidgets
 from Core.Database.Database import Settings
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from Core.Calculations import radiation
-from Core.Calculations import thermalLoad
+from Core.Calculations import radiation, thermalLoad, fit
 engine = create_engine('sqlite:///settings.sqlite', echo = False)
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -44,6 +43,7 @@ class Load(QtWidgets.QDialog, load):
 		
 		if retVal == QtWidgets.QMessageBox.Ok:
 			self.close()
+			fit.fit(fileName)
 			thermalLoad.thermalLoad(fileName)		
 		else:
 			msg.close()
@@ -138,6 +138,7 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 			thermalLoad.thermalLoad(fileName)
 			self.load.populate()
 		else:
+
 			self.statusBar.showMessage("Cancelled.", 2000)
 
 

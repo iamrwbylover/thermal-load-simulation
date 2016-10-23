@@ -10,7 +10,7 @@ from Core.Calculations.Functions import air_temp
 
 
 
-engine = create_engine('sqlite:///settings.sqlite', echo=True)
+engine = create_engine('sqlite:///settings.sqlite', echo=False)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -160,28 +160,21 @@ def thermalLoad(fileName):
         T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc));
         T2w[i+1] = T2w[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
 
-        if dm1 != 0 and shift == False:
-          Tc[i+1] = Tair[i] - h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*dm1);
-          if Tc[i+1] < (273.15+ac_min):
-              Tc[i+1] = 273.15+ac_min;
-              dm1 = h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*(Tair[i]-Tc[i+1]));
+        # if dm1 != 0 and shift == False:
+        #     Tc[i+1] = Tair[i] - h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*dm1);
+        #     if Tc[i+1] < (273.15+ac_min):
+        #         Tc[i+1] = 273.15+ac_min;
+        #     dm1 = h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*(Tair[i]-Tc[i+1]));
 
-        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(C_air + m1*c_a-me*c_a)) #- c_a*dm1*(Tair[i]-Tc[i+1])/(C_air + m1*c_a-me*c_a))# + s*10*(290.15-Tair[i])/C_air #+ s*1.4*A_w*((at[i]+273.15)-Tair[i])/C_air - s*800/C_air ;
+        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(C_air + m1*c_a-me*c_a)) + s*100*(290.15-Tair[i])/C_air# - s*(c_a*dm1*(Tair[i]-Tc[i+1])/(C_air + m1*c_a-me*c_a))# + s*10*(290.15-Tair[i])/C_air #+ s*1.4*A_w*((at[i]+273.15)-Tair[i])/C_air - s*800/C_air ;
         Q[i+1] = c_a*dm1*(Tair[i]-Tc[i+1]) + m1*c_a*(Tair[i+1]-Tair[i])/s;                
 
     
 
 
     figure(1)
-    plot(T2n-273.15)
-    plot(T2e-273.15)
-    plot(T2w-273.15)
-    plot(T2s-273.15)
-    # plot(Tair-273.15)
-    # plot(sol_airn)
-    # plot(sol_aire)
-    # plot(sol_airw)
-    # plot(sol_aire)
+    plot(Tair-273.15)
+    
     plot(at-273.15)
     show()
 
