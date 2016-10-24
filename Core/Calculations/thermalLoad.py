@@ -15,6 +15,7 @@ engine = create_engine('sqlite:///settings.sqlite', echo=False)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+
 noOfDays = 5
 
 
