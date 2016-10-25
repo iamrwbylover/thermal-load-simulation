@@ -111,7 +111,7 @@ def save(elevs, azis, fileName):
     print("Sunpath angles saved as excel file")
 
 lat,longi, LSTM = 0,0,0
-N = 1000
+N = 48
 #function to assign values 
 
 def calculateSunPath(fileName):

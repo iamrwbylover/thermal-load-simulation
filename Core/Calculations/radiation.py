@@ -14,7 +14,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 noOfDays=5
-N = noOfDays*1000
+N = noOfDays*48
 
 
 hr = np.linspace(0,noOfDays*24,N)
