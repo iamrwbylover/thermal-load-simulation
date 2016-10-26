@@ -24,18 +24,39 @@ def fit(fileName):
     dp = []
     rh = []
     cc = []
+    dd = 0
+    month2 = 0
+    days = []
     for i in range(noOfDays):
-        d = day + i
-        filename = str(month)+'-'+str(d)
-        start = pd.read_csv(path+'/'+filename+'.csv')
-        drybulb = start['TemperatureC']
-        dewpoint = start['Dew PointC']
-        relHum = start['Humidity']
-        cloudCover = start['Conditions']
-        db.append(drybulb)
-        dp.append(dewpoint)
-        rh.append(relHum)
-        cc.append(cloudCover)
+        try:
+            d = day + i
+            filename = str(month)+'-'+str(d)
+            start = pd.read_csv(path+'/'+filename+'.csv')
+            drybulb = start['TemperatureC']
+            dewpoint = start['Dew PointC']
+            relHum = start['Humidity']
+            cloudCover = start['Conditions']
+            db.append(drybulb)
+            dp.append(dewpoint)
+            rh.append(relHum)
+            cc.append(cloudCover)
+            days.append([month,d])
+        except:
+            dd += 1
+            month2 = month + 1
+            if month2 == 13:
+                month2 = 1
+            filename = str(month2)+'-'+str(dd)
+            start = pd.read_csv(path+'/'+filename+'.csv')
+            drybulb = start['TemperatureC']
+            dewpoint = start['Dew PointC']
+            relHum = start['Humidity']
+            cloudCover = start['Conditions']
+            db.append(drybulb)
+            dp.append(dewpoint)
+            rh.append(relHum)
+            cc.append(cloudCover)
+            days.append([month2,dd])
 
     curveDB = np.array(pd.concat(db))
     curveDP = np.array(pd.concat(dp))
@@ -51,6 +72,5 @@ def fit(fileName):
     cloudCover = interpolate.interp1d(x,curveCC)
     
 
-    return drybulb, dewpoint, relHum, cloudCover
-	
+    return drybulb, dewpoint, relHum, cloudCover, days
 	

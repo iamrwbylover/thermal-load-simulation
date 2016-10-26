@@ -108,7 +108,7 @@ def save(elevs, azis, fileName):
     df.to_excel(writer, sheet_name='Sun Path Angles')
     writer.save()
     writer.close()
-    print("Sunpath angles saved as excel file")
+    print("Sunpath angles saved as excel file.")
 
 lat,longi, LSTM = 0,0,0
 N = 48
@@ -134,7 +134,6 @@ def calculateSunPath(fileName):
     conA, conE = [], []
     for addition in range(noOfDays):
         addition = int(addition)
-        print(addition)
         numDay = countNomimal(year,month, day+addition)
         HRA= timeCorrection(numDay+addition)     
         delta = deltaCalc(numDay+addition)
