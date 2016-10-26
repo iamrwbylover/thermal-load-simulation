@@ -1,8 +1,5 @@
-# import matplotlib
-# matplotlib.use('Qt5Agg')
 import pandas as pd
 import numpy as np
-from matplotlib.pyplot import plot, show, legend
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Core.Database.Database import Settings

@@ -1,11 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Core.Database.Database import Settings
-import Core.Calculations.Functions as fxn
 import numpy as np
 import pandas as pd
-
-import matplotlib.pyplot as plt
 
 
 engine = create_engine('sqlite:///settings.sqlite', echo=False)
@@ -16,14 +13,7 @@ session = Session()
 noOfDays=5
 N = noOfDays*48
 
-
 hr = np.linspace(0,noOfDays*24,N)
-I_cloud = np.zeros(N)
-I_latm = np.empty(N)
-I_lterr = np.empty(N)
-I_lrefl = np.empty(N)
-I_ltotal = np.empty(N)
-I_l = np.empty(N)
 airtemp = np.empty(N)
 hr = np.linspace(0,24,N)
 C = 0.0 #cloud cover
@@ -61,7 +51,8 @@ rhol_soil = 0
 rhos_soil = 0
 theta = 0
 
-
+def airmass(z):
+    return (1)/(np.cos(z) + 0.50572*(96.07995-z*(180/np.pi))**(-1.6364))
 
 def calculateRadiation(fileName):
     global epsi_soil, rhol_soil, rhos_soil, azi, elev, I_dni,I_diff
@@ -78,23 +69,12 @@ def calculateRadiation(fileName):
         rhos_soil = sett.swRC
         theta = sett.direction*np.pi/180
 
-    #long wave radiation
-    # for i in range(N):
-    #     T[i] = fxn.air_temp(hr[i])
-    #     I_latm[i] = C*I_cloud[i] + (1-C)*sigma*(T[i]**4)*(0.79 - 
-    #     0.174*10**(-0.041*fxn.vapor_pressure(T[i])))
-    #     I_lterr[i] = sigma*T[i]**4
-    #     I_lrefl[i] = rhol_soil*I_latm[i]
-    #     I_l[i] = g_atm*I_latm[i] + g_terr*(I_lterr[i] + I_lrefl[i])    
-
-    #direct normal irradiance plus diffused
-
     for i in range(N):
         if elev[i] < 0:
             I_dni[i] = 0
         else:
             angle = np.pi/2 - elev[i]
-            am = fxn.airmass(angle)
+            am = airmass(angle)
             I_dni[i] = A*0.7**(am**0.678)
         I_diff[i] = c*I_dni[i]
 
@@ -140,11 +120,6 @@ def saveRadiation(fileName,I_1,I_2,I_3,I_4):
                         'Western':I_3,
                         'Southern':I_4,})
     df.to_excel(writer, sheet_name = 'SWRadiation')
-    # plt.plot(I_1)
-    # plt.plot(I_2)
-    # plt.plot(I_3)
-    # plt.plot(I_4)
-    # plt.show()
     print("Shortwaved Radiation saved as excel file.")
     writer.save()
     writer.close()

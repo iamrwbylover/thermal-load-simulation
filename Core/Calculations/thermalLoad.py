@@ -1,13 +1,9 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import plot, show, figure
-from scipy.linalg import expm, inv
+from matplotlib.pyplot import show, figure, rcParams
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Core.Database.Database import Settings
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
-# from Core.Calculations.Functions import air_temp
 from Core.Calculations.fit import fit
 
 
@@ -180,6 +176,9 @@ def thermalLoad(fileName):
     dm1 = dens*dv #kg/s
     m1 = s*dm1 #kg
 
+
+
+
     dve = 0.05 #m3/s
     ve = s*dve #m3 
     me = dens*ve #kg
@@ -198,6 +197,8 @@ def thermalLoad(fileName):
 
     shift = False
 
+    Tfree = np.empty(N)
+    Tfree[0] = Ti + 273.15
     
     for i in range(N-1):
         T1n[i+1] = T1n[i] + s*(h_rc*((sol_airn[i]+273.15) - T1n[i])/Cc + (T2n[i]-T1n[i])/(R*Cc));
@@ -209,17 +210,18 @@ def thermalLoad(fileName):
         T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc));
         T2w[i+1] = T2w[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
 
-        if (dm1 != 0 and shift == False):
-            Tc[i+1] = Tair[i] - h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*dm1);
-            if Tc[i+1] < (273.15+ac_min):
-                Tc[i+1] = 273.15+ac_min;
-            dm1 = h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*(Tair[i]-Tc[i+1]));
+        # if (dm1 != 0 and shift == False):
+        #     Tc[i+1] = Tair[i] - h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*dm1);
+        #     if Tc[i+1] < (273.15+ac_min):
+        #         Tc[i+1] = 273.15+ac_min;
+        #     dm1 = h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*(Tair[i]-Tc[i+1]));
 
-        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i])))/(C_air + m1*c_a-me*c_a)# - s*(c_a*dm1*(Tair[i]-Tc[i+1])/(C_air + m1*c_a-me*c_a))#+ s*100*(290.15-Tair[i])/C_air## + s*1.4*A_w*((at[i]+273.15)-Tair[i])/C_air - s*800/C_air ;
-        Q[i+1] = c_a*dm1*(Tair[i]-Tc[i+1]) + m1*c_a*(Tair[i+1]-Tair[i])/s              
-
+         #- s*(c_a*dm1*(Tair[i]-16+273.15)/(C_air + m1*c_a))#+ s*100*(290.15-Tair[i])/C_air## + s*1.4*A_w*((at[i]+273.15)-Tair[i])/C_air - s*800/C_air ;
+        Q[i+1] = (h_c*(an*(T2n[i]-273.15-Tcomf)+ae*(T2e[i]-273.15-Tcomf)+aS*(T2s[i]-273.15-Tcomf)+aw*(T2w[i]-273.15-Tcomf)))
+        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i])))/(C_air) - s*Q[i+1]/(C_air)
+        Tfree[i+1] = Tfree[i] + s*(h_c*(an*(T2n[i]-Tfree[i])+ae*(T2e[i]-Tfree[i])+aS*(T2s[i]-Tfree[i])+aw*(T2w[i]-Tfree[i])))/(C_air)
     days = dayNames(days)
-    show_plot(Tair,at,Q, days)
+    show_plot(Tair,Tfree,at,Q, days)
 
 
 def dayNames(days):
@@ -254,55 +256,53 @@ def dayNames(days):
         names.append(monthName+' '+str(day))
     return names
 
-def show_plot(Tair, at, Q, days):
+def show_plot(Tair, Tfree,at, Q, days):
 
     fig = figure("Thermal Load Calculator")
 
     energy = fig.add_subplot(211,axisbg='black')
     temperature = fig.add_subplot(212,axisbg='black')
-
-
     energy.set_axisbelow(True)
+    temperature.set_axisbelow(True)
     
+    #minor grids
     energy.xaxis.grid(True,'minor', color='w',linestyle='-',linewidth=.2)
     energy.yaxis.grid(True,'minor', color='w',linestyle='-',linewidth=.2)
-    
     #ticks    
     energy.xaxis.set_ticks(np.arange(0,24*noOfDays+1,24))
     energy.minorticks_on()
     energy.set_xticklabels(days)
-    
+    #major grids
     energy.xaxis.grid(True,'major',linewidth=.5,linestyle='-', color='w')
     energy.yaxis.grid(True,'major',linewidth=.5,linestyle='-', color='w')
-    
+    #labels
     energy.set_ylabel("Required Energy (J)")
     energy.set_xlabel("hour")
 
 
-    params = {'mathtext.default': 'regular' }          
-    plt.rcParams.update(params)
 
-    temperature.set_axisbelow(True)
+    #minor grids
     temperature.xaxis.grid(True,'minor', color='w',linestyle='-',linewidth=.2)
-    temperature.yaxis.grid(True,'minor', color='w',linestyle='-',linewidth=.2)
-    
+    temperature.yaxis.grid(True,'minor', color='w',linestyle='-',linewidth=.2)   
     #ticks
     temperature.xaxis.set_ticks(np.arange(0,24*noOfDays+1,24))
     temperature.minorticks_on()
     temperature.set_xticklabels(days)
-
+    #major grids
     temperature.xaxis.grid(True,'major',linewidth=.5,linestyle='-', color='w')
     temperature.yaxis.grid(True,'major',linewidth=.5, linestyle='-',color='w')
-    
+    #labels
     temperature.set_ylabel("Temperature ($^{o}C$)")
     temperature.set_xlabel("hour")
     
+    #for mathematical fonts
+    params = {'mathtext.default': 'regular' }          
+    rcParams.update(params)
     
     energy.plot(hour, Q, linewidth='1.5', label='Energy requirements')
-    #energy.legend(bbox_to_anchor=(-1, 1), loc=2, borderaxespad=0.,fontsize='medium',
-    #    fancybox=True, shadow=True)
-    
+
     temperature.plot(hour,Tair-273.15, linewidth='1.5', label='$T_{room}$')
+    temperature.plot(hour, Tfree-273.15, linewidth='1.5',label='$T_{free}$')
     temperature.plot(hour, at-273.15, linewidth='1.5',label='$T_{outside}$')
     temperature.legend(bbox_to_anchor=(1, 1), loc=2, borderaxespad=0., fontsize='medium',
         fancybox=True, shadow=True)

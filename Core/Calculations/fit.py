@@ -4,7 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Core.Database.Database import Settings
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy import interpolate
 engine = create_engine('sqlite:///settings.sqlite', echo=False)
 

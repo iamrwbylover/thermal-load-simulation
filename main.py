@@ -31,23 +31,22 @@ class Load(QtWidgets.QDialog, load):
 		self.populate()
 		
 	def loadIt(self,i):
-		if i==0:
-			fileName = self.cb.currentText()
-			msg = QtWidgets.QMessageBox()
-			msg.setIcon(QtWidgets.QMessageBox.Question)
+		fileName = self.cb.currentText()
+		msg = QtWidgets.QMessageBox()
+		msg.setIcon(QtWidgets.QMessageBox.Question)
 
-			msg.setText("Load dataset {}?".format(fileName))
-			msg.setWindowTitle("Load")
-			msg.setStandardButtons(QtWidgets.QMessageBox.Ok| QtWidgets.QMessageBox.Cancel)
+		msg.setText("Load dataset {}?".format(fileName))
+		msg.setWindowTitle("Load")
+		msg.setStandardButtons(QtWidgets.QMessageBox.Ok| QtWidgets.QMessageBox.Cancel)
 
-			retVal = msg.exec_()
-			
-			if retVal == QtWidgets.QMessageBox.Ok:
-				self.close()
-				fit.fit(fileName)
-				thermalLoad.thermalLoad(fileName)		
-			else:
-				msg.close()
+		retVal = msg.exec_()
+		
+		if retVal == QtWidgets.QMessageBox.Ok:
+			self.close()
+			fit.fit(fileName)
+			thermalLoad.thermalLoad(fileName)		
+		else:
+			msg.close()
 		
 	def populate(self):
 		global items
