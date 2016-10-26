@@ -43,7 +43,7 @@ class Load(QtWidgets.QDialog, load):
 		
 		if retVal == QtWidgets.QMessageBox.Ok:
 			self.close()
-			fit.fit(fileName)
+			print(fileName)
 			thermalLoad.thermalLoad(fileName)		
 		else:
 			msg.close()
@@ -55,7 +55,7 @@ class Load(QtWidgets.QDialog, load):
 				self.cb.addItem(sett.name)
 				items.append(sett.name)
 
-class First(QtWidgets.QMainWindow, Ui_MainWindow):
+class Main(QtWidgets.QMainWindow, Ui_MainWindow):
 	def __init__(self, parent=None):
 
 		QtWidgets.QMainWindow.__init__(self)
@@ -144,6 +144,6 @@ class First(QtWidgets.QMainWindow, Ui_MainWindow):
 
 if __name__ == "__main__":
 	app = QtWidgets.QApplication(sys.argv)
-	window = First()
+	window = Main()
 	window.show()
 	sys.exit(app.exec_())

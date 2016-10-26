@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Core.Database.Database import Settings
 from Core.Calculations.fit import fit
-
+from scipy.integrate import simps
 
 engine = create_engine('sqlite:///settings.sqlite', echo=False)
 
@@ -172,30 +172,10 @@ def thermalLoad(fileName):
     c_a = 0.718*1000 #specific heat of air
     C_air = V*dens*c_a
 
-    dv = 0.1 #m3/s
-    dm1 = dens*dv #kg/s
-    m1 = s*dm1 #kg
-
-
-
-
-    dve = 0.05 #m3/s
-    ve = s*dve #m3 
-    me = dens*ve #kg
-
     Q = np.zeros(N)
-    Q[0] = 0
 
     Tc = np.empty(N)
     Tc[0] = Tair[0]
-
-    dm1dt = np.empty(N)
-    dm1dt[0] = dm1
-
-    inputTemp = 25
-    ac_min = 18
-
-    shift = False
 
     Tfree = np.empty(N)
     Tfree[0] = Ti + 273.15
@@ -210,17 +190,11 @@ def thermalLoad(fileName):
         T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc));
         T2w[i+1] = T2w[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
 
-        # if (dm1 != 0 and shift == False):
-        #     Tc[i+1] = Tair[i] - h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*dm1);
-        #     if Tc[i+1] < (273.15+ac_min):
-        #         Tc[i+1] = 273.15+ac_min;
-        #     dm1 = h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i]))/(c_a*(Tair[i]-Tc[i+1]));
-
-         #- s*(c_a*dm1*(Tair[i]-16+273.15)/(C_air + m1*c_a))#+ s*100*(290.15-Tair[i])/C_air## + s*1.4*A_w*((at[i]+273.15)-Tair[i])/C_air - s*800/C_air ;
-        Q[i+1] = (h_c*(an*(T2n[i]-273.15-Tcomf)+ae*(T2e[i]-273.15-Tcomf)+aS*(T2s[i]-273.15-Tcomf)+aw*(T2w[i]-273.15-Tcomf)))
-        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i])))/(C_air) - s*Q[i+1]/(C_air)
+        Q[i] = (h_c*(an*(T2n[i]-273.15-Tcomf)+ae*(T2e[i]-273.15-Tcomf)+aS*(T2s[i]-273.15-Tcomf)+aw*(T2w[i]-273.15-Tcomf)))
+        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
         Tfree[i+1] = Tfree[i] + s*(h_c*(an*(T2n[i]-Tfree[i])+ae*(T2e[i]-Tfree[i])+aS*(T2s[i]-Tfree[i])+aw*(T2w[i]-Tfree[i])))/(C_air)
     days = dayNames(days)
+    Q[N-1] = Q[N-2]
     show_plot(Tair,Tfree,at,Q, days)
 
 
@@ -276,7 +250,7 @@ def show_plot(Tair, Tfree,at, Q, days):
     energy.xaxis.grid(True,'major',linewidth=.5,linestyle='-', color='w')
     energy.yaxis.grid(True,'major',linewidth=.5,linestyle='-', color='w')
     #labels
-    energy.set_ylabel("Required Energy (J)")
+    energy.set_ylabel("Required Power (W)")
     energy.set_xlabel("hour")
 
 
@@ -301,11 +275,14 @@ def show_plot(Tair, Tfree,at, Q, days):
     
     energy.plot(hour, Q, linewidth='1.5', label='Energy requirements')
 
-    temperature.plot(hour,Tair-273.15, linewidth='1.5', label='$T_{room}$')
+    temperature.plot(hour,Tair-273.15, linewidth='1.5', label='$T_{wAC}$')
     temperature.plot(hour, Tfree-273.15, linewidth='1.5',label='$T_{free}$')
     temperature.plot(hour, at-273.15, linewidth='1.5',label='$T_{outside}$')
     temperature.legend(bbox_to_anchor=(1, 1), loc=2, borderaxespad=0., fontsize='medium',
         fancybox=True, shadow=True)
+    secs = np.linspace(0,noOfDays*24*3600,N)
+    energy = simps(y=Q,x=secs,even='avg')
+    print('{} kJ'.format(energy/1000))
     show()
 
     
