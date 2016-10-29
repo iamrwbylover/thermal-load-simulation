@@ -301,7 +301,7 @@ def show_plot(Tair, Tfree,at, Q, days,fileName):
     energy.plot(hour, Q, linewidth='1.5', label='Energy requirements')
 
     temperature.plot(hour,Tair-273.15, linewidth='1.5', label='$T_{wAC}$')
-    temperature.plot(hour, Tfree-273.15, linewidth='1.5',label='$T_{free}$')
+    temperature.plot(hour, Tfree-273.15, linewidth='1.5',label='$T_{free}$',linestyle='--')
     temperature.plot(hour, at-273.15, linewidth='1.5',label='$T_{outside}$')
     temperature.legend(bbox_to_anchor=(1, 1), loc=2, borderaxespad=0., fontsize='medium',
         fancybox=True, shadow=True)
