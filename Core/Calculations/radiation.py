@@ -10,8 +10,8 @@ engine = create_engine('sqlite:///settings.sqlite', echo=False)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-noOfDays=5
-N = noOfDays*48
+noOfDays = 7
+N = noOfDays*500
 
 hr = np.linspace(0,noOfDays*24,N)
 airtemp = np.empty(N)

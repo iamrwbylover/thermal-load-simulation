@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Qt5Agg')
 import pandas as pd
 import numpy as np
 from matplotlib.pyplot import show, figure, rcParams
@@ -5,18 +7,26 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Core.Database.Database import Settings
 from Core.Calculations.fit import fit
-from scipy.integrate import simps
+from scipy.integrate import simps, odeint
+from matplotlib.pyplot import show,plot
 
 engine = create_engine('sqlite:///settings.sqlite', echo=False)
 
 Session = sessionmaker(bind=engine)
 session = Session()
 
+noOfDays = 7
 
-noOfDays = 5
+count = 0
+N = noOfDays*500
+
+sol_airn = np.empty(N)
+sol_aire = np.empty(N)
+sol_airs = np.empty(N)
+sol_airw = np.empty(N)
 
 
-N = noOfDays*48
+
 hour = np.linspace(0,noOfDays*24,N)
 
 air_temp = 0
@@ -38,9 +48,9 @@ def vapor_pressure(i):
     T = air_temp(hour[i])-273.15
     ps = A*10**(m*T/(T+Tn))
     RH = relHum(hour[i])
-    p = RH*ps
-    
+    p = RH*ps    
     return p
+
 def I_cloud(i):
     global dew_point
     return sigma*(dew_point(hour[i]))**4
@@ -65,19 +75,18 @@ def cc(i):
     else:
         return 1.0
 
-test = []
-h_c = 0
-def dI_l(i):
-    global sigma, cloudCover, dew_point, test
+def skyTemp(i):
+    global sigma, cloudCover, dew_point
     I = cc(i)*(I_cloud(i))+(1-cc(i))*sigma*(air_temp(hour[i])**4)*(0.79-0.174*10**(-0.041*vapor_pressure(i)))
     return (I/sigma)**.25
 def T_sa(i, I):
-    global h_rc, air_temp, dew_point, epsi, alpha, h_c
-    T = air_temp(hour[i])-273.15 + alpha*I[i]/h_rc- g_atm*6.5*(air_temp(hour[i]) - dI_l(i))/h_rc #+ (h_r/h_rc)*( (dI_l(i)-air_temp(hour[i]))*g_atm ) + I[i]/h_rc #+ alpha*I[i]/h_rc - epsi*dI_l(i)/h_rc#- g_atm*6.5*(air_temp(hour[i]) - dew_point(hour[i]))/h_rc
+    global h_rc, air_temp, dew_point, epsi, alpha
+    T = air_temp(hour[i])-273.15 + alpha*I[i]/h_rc- g_atm*6.5*(air_temp(hour[i]) - skyTemp(i))/h_rc
     return T
 
 def thermalLoad(fileName):
-    global alpha, N, air_temp, dew_point, epsi, cloudCover, relHum, h_c
+    global alpha, N, air_temp, dew_point, epsi, cloudCover, relHum
+    global sol_airn,sol_aire,sol_airs,sol_airw
     for sett in session.query(Settings).filter(Settings.name==fileName):
 
         length = sett.length
@@ -119,22 +128,15 @@ def thermalLoad(fileName):
 
     
     at = np.empty(N)
-    T_atm = np.empty(N)
 
     for i in range(N):
         sol_airn[i] = T_sa(i, I_sn)
         sol_aire[i] = T_sa(i, I_se)
         sol_airs[i] = T_sa(i, I_ss)
         sol_airw[i] = T_sa(i, I_sw)
-        T_atm[i] = dI_l(i)
         at[i] = air_temp(hour[i])
 
     #heat
-    Qn = np.empty(N)
-    Qe = np.empty(N)
-    Qs = np.empty(N)
-    Qw = np.empty(N)
-
     Qt = np.empty(N) # total heat
 
     T1n = np.empty(N)
@@ -158,7 +160,7 @@ def thermalLoad(fileName):
     Tair = np.empty(N)
     Tair[0] = 273.15 + Ti
 
-    s = 3600*(24/N)
+    s = (noOfDays*24*3600-0)/N
 
     an = width*height
     ae = length*height
@@ -179,23 +181,47 @@ def thermalLoad(fileName):
 
     Tfree = np.empty(N)
     Tfree[0] = Ti + 273.15
+
+    Tcomfmin = 23
+    Tcomfmax = 26
+
+
     
+
     for i in range(N-1):
         T1n[i+1] = T1n[i] + s*(h_rc*((sol_airn[i]+273.15) - T1n[i])/Cc + (T2n[i]-T1n[i])/(R*Cc));
         T2n[i+1] = T2n[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2n[i]-T1n[i])/(R*Cc));
         T1e[i+1] = T1e[i] + s*(h_rc*((sol_aire[i]+273.15) - T1e[i])/Cc + (T2e[i]-T1e[i])/(R*Cc));
-        T2e[i+1] = T2e[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2e[i]-T1e[i])/(R*Cc));
+        T2e[i+1] = T2e[i] + s*(h_c*(Tair[i]-T2e[i])/Cc-(T2e[i]-T1e[i])/(R*Cc));
         T1s[i+1] = T1s[i] + s*(h_rc*((sol_airs[i]+273.15) - T1s[i])/Cc + (T2s[i]-T1s[i])/(R*Cc));
-        T2s[i+1] = T2s[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2s[i]-T1s[i])/(R*Cc));
+        T2s[i+1] = T2s[i] + s*(h_c*(Tair[i]-T2s[i])/Cc-(T2s[i]-T1s[i])/(R*Cc));
         T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc));
-        T2w[i+1] = T2w[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
+        T2w[i+1] = T2w[i] + s*(h_c*(Tair[i]-T2w[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
 
-        Q[i] = (h_c*(an*(T2n[i]-273.15-Tcomf)+ae*(T2e[i]-273.15-Tcomf)+aS*(T2s[i]-273.15-Tcomf)+aw*(T2w[i]-273.15-Tcomf)))
-        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
+        
         Tfree[i+1] = Tfree[i] + s*(h_c*(an*(T2n[i]-Tfree[i])+ae*(T2e[i]-Tfree[i])+aS*(T2s[i]-Tfree[i])+aw*(T2w[i]-Tfree[i])))/(C_air)
+        diff = (Tfree[i+1]-Tfree[i])
+
+        
+        if Tfree[i+1] < (Tcomfmax+273.15):
+            Q[i] = 0
+
+        else:
+            Q[i] = (h_c*(an*(T2n[i]-273.15-Tcomf)+ae*(T2e[i]-273.15-Tcomf)+aS*(T2s[i]-273.15-Tcomf)+aw*(T2w[i]-273.15-Tcomf)))
+        
+        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
+    
+            
+
     days = dayNames(days)
     Q[N-1] = Q[N-2]
-    show_plot(Tair,Tfree,at,Q, days)
+
+    #
+    secs = np.linspace(0,noOfDays*24*3600,N)
+    energy = simps(y=Q,x=secs,even='avg')
+    print(fileName)
+    print('Required energy (5 days):{} kJ'.format(round((energy/1000),2)))
+    show_plot(Tair,Tfree,at,Q, days,fileName)
 
 
 def dayNames(days):
@@ -230,9 +256,9 @@ def dayNames(days):
         names.append(monthName+' '+str(day))
     return names
 
-def show_plot(Tair, Tfree,at, Q, days):
+def show_plot(Tair, Tfree,at, Q, days,fileName):
 
-    fig = figure("Thermal Load Calculator")
+    fig = figure(fileName)
 
     energy = fig.add_subplot(211,axisbg='black')
     temperature = fig.add_subplot(212,axisbg='black')
@@ -251,7 +277,6 @@ def show_plot(Tair, Tfree,at, Q, days):
     energy.yaxis.grid(True,'major',linewidth=.5,linestyle='-', color='w')
     #labels
     energy.set_ylabel("Required Power (W)")
-    energy.set_xlabel("hour")
 
 
 
@@ -267,7 +292,7 @@ def show_plot(Tair, Tfree,at, Q, days):
     temperature.yaxis.grid(True,'major',linewidth=.5, linestyle='-',color='w')
     #labels
     temperature.set_ylabel("Temperature ($^{o}C$)")
-    temperature.set_xlabel("hour")
+    temperature.set_xlabel("day")
     
     #for mathematical fonts
     params = {'mathtext.default': 'regular' }          
@@ -280,9 +305,6 @@ def show_plot(Tair, Tfree,at, Q, days):
     temperature.plot(hour, at-273.15, linewidth='1.5',label='$T_{outside}$')
     temperature.legend(bbox_to_anchor=(1, 1), loc=2, borderaxespad=0., fontsize='medium',
         fancybox=True, shadow=True)
-    secs = np.linspace(0,noOfDays*24*3600,N)
-    energy = simps(y=Q,x=secs,even='avg')
-    print('{} kJ'.format(energy/1000))
     show()
 
     

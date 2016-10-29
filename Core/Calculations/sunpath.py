@@ -10,7 +10,7 @@ engine = create_engine('sqlite:///settings.sqlite', echo=False)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-noOfDays = 5
+noOfDays = 7
 
 
 
@@ -108,7 +108,7 @@ def save(elevs, azis, fileName):
     print("Sunpath angles saved as excel file.")
 
 lat,longi, LSTM = 0,0,0
-N = 48
+N = 500
 #function to assign values 
 
 def calculateSunPath(fileName):

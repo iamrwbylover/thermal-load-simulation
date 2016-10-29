@@ -11,7 +11,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
-noOfDays = 5
+noOfDays = 7
 path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..','..','Data/Conditions/'))
 
 def fit(fileName):
