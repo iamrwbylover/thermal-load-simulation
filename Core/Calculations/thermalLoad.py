@@ -104,6 +104,7 @@ def thermalLoad(fileName):
         alpha = sett.swAbs
         epsi = sett.lwEWall
         sigma = 5.67*(10)**(-8)
+        power = sett.altitude
         noOfDays = int(sett.numDays)
     N = noOfDays*500
     hour = np.linspace(0,noOfDays*24,N)
@@ -154,150 +155,384 @@ def thermalLoad(fileName):
     # plot(sol_airs)
     # show()
     # #heat
-    Qt = np.empty(N) # total heat
 
-    T1n = np.empty(N)
-    T2n = np.empty(N)
-    T1e = np.empty(N)
-    T2e = np.empty(N)
-    T1s = np.empty(N)
-    T2s = np.empty(N)
-    T1w = np.empty(N)
-    T2w = np.empty(N)
+    # T1n = np.empty(N)
+    # T2n = np.empty(N)
+    # T1e = np.empty(N)
+    # T2e = np.empty(N)
+    # T1s = np.empty(N)
+    # T2s = np.empty(N)
+    # T1w = np.empty(N)
+    # T2w = np.empty(N)
 
-    T1n[0] = 273.15 + Ti
-    T2n[0] = 273.15 + Ti+.001
-    T1e[0] = 273.15 + Ti
-    T2e[0] = 273.15 + Ti+.001
-    T1s[0] = 273.15 + Ti
-    T2s[0] = 273.15 + Ti+.001
-    T1w[0] = 273.15 + Ti
-    T2w[0] = 273.15 + Ti+.001
+    # T1n[0] = 273.15 + Ti
+    # T2n[0] = 273.15 + Ti+.001
+    # T1e[0] = 273.15 + Ti
+    # T2e[0] = 273.15 + Ti+.001
+    # T1s[0] = 273.15 + Ti
+    # T2s[0] = 273.15 + Ti+.001
+    # T1w[0] = 273.15 + Ti
+    # T2w[0] = 273.15 + Ti+.001
 
-    T1nf = np.empty(N)
-    T2nf = np.empty(N)
-    T1ef = np.empty(N)
-    T2ef = np.empty(N)
-    T1sf = np.empty(N)
-    T2sf = np.empty(N)
-    T1wf = np.empty(N)
-    T2wf = np.empty(N)
+    # T1nf = np.empty(N)
+    # T2nf = np.empty(N)
+    # T1ef = np.empty(N)
+    # T2ef = np.empty(N)
+    # T1sf = np.empty(N)
+    # T2sf = np.empty(N)
+    # T1wf = np.empty(N)
+    # T2wf = np.empty(N)
 
-    T1nf[0] = 273.15 + Ti
-    T2nf[0] = 273.15 + Ti+.001
-    T1ef[0] = 273.15 + Ti
-    T2ef[0] = 273.15 + Ti+.001
-    T1sf[0] = 273.15 + Ti
-    T2sf[0] = 273.15 + Ti+.001
-    T1wf[0] = 273.15 + Ti
-    T2wf[0] = 273.15 + Ti+.001
-
-
-    Tair = np.empty(N)
-    Tair[0] = 273.15 + Ti
-    Tfree = np.empty(N)
-    Tfree[0] = 273.15 + Ti
-
-    s = (noOfDays*24*3600-0)/N
-
-    an = width*height
-    ae = length*height
-    aS = width*height
-    aw = length*width
+    # T1nf[0] = 273.15 + Ti
+    # T2nf[0] = 273.15 + Ti+.001
+    # T1ef[0] = 273.15 + Ti
+    # T2ef[0] = 273.15 + Ti+.001
+    # T1sf[0] = 273.15 + Ti
+    # T2sf[0] = 273.15 + Ti+.001
+    # T1wf[0] = 273.15 + Ti
+    # T2wf[0] = 273.15 + Ti+.001
 
 
-    A_f = (length-2*thickness)*(width-2*thickness)
-    V = A_f*(height)
-    dens = 1.225 #density of air 
-    c_a = 0.718*1000 #specific heat of air
-    C_air = V*dens*c_a
+    # Tair = np.empty(N)
+    # Tair[0] = 273.15 + Ti
+    # Tfree = np.empty(N)
+    # Tfree[0] = 273.15 + Ti
 
-    Q = np.zeros(N)
+    # s = (noOfDays*24*3600-0)/N
 
-    a = thickness*height 
+    # an = width*height
+    # ae = length*height
+    # aS = width*height
+    # aw = length*width
 
-    Tc = np.empty(N)
-    Tc[0] = Tair[0]
+
+    # A_f = (length-2*thickness)*(width-2*thickness)
+    # V = A_f*(height)
+    # dens = 1.225 #density of air 
+    # c_a = 0.718*1000 #specific heat of air
+    # C_air = V*dens*c_a
+
+    # Q = np.zeros(N)
+
+    # a = thickness*height 
+
+    # Tc = np.empty(N)
+    # Tc[0] = Tair[0]
 
     
 
     Tcomfmin = Tcomf-3
     Tcomfmax = Tcomf+1
 
+    dc = []
+    c = []
 
-    for i in range(N-1):
+    pow = np.linspace(0,2000,2001)
+    for k in pow:
+        T1n = np.empty(N)
+        T2n = np.empty(N)
+        T1e = np.empty(N)
+        T2e = np.empty(N)
+        T1s = np.empty(N)
+        T2s = np.empty(N)
+        T1w = np.empty(N)
+        T2w = np.empty(N)
 
-        T1n[i+1] = T1n[i] + s*(h_rc*((sol_airn[i]+273.15) - T1n[i])/Cc + (T2n[i]-T1n[i])/(R*Cc))
-        T1nf[i+1] = T1nf[i] + s*(h_rc*((sol_airn[i]+273.15) - T1nf[i])/Cc + (T2nf[i]-T1nf[i])/(R*Cc))
+        T1n[0] = 273.15 + Ti
+        T2n[0] = 273.15 + Ti+.001
+        T1e[0] = 273.15 + Ti
+        T2e[0] = 273.15 + Ti+.001
+        T1s[0] = 273.15 + Ti
+        T2s[0] = 273.15 + Ti+.001
+        T1w[0] = 273.15 + Ti
+        T2w[0] = 273.15 + Ti+.001
 
-        T2n[i+1] = T2n[i] + s*(h_c*(Tfree[i]-T2n[i])/Cc-(T2n[i]-T1n[i])/(R*Cc))
-        T2nf[i+1] = T2nf[i] + s*(h_c*(Tair[i]-T2nf[i])/Cc-(T2nf[i]-T1nf[i])/(R*Cc))
+        T1nf = np.empty(N)
+        T2nf = np.empty(N)
+        T1ef = np.empty(N)
+        T2ef = np.empty(N)
+        T1sf = np.empty(N)
+        T2sf = np.empty(N)
+        T1wf = np.empty(N)
+        T2wf = np.empty(N)
 
-        T1e[i+1] = T1e[i] + s*(h_rc*((sol_aire[i]+273.15) - T1e[i])/Cc + (T2e[i]-T1e[i])/(R*Cc))
-        T1ef[i+1] = T1ef[i] + s*(h_rc*((sol_aire[i]+273.15) - T1ef[i])/Cc + (T2ef[i]-T1ef[i])/(R*Cc))
-
-        T2e[i+1] = T2e[i] + s*(h_c*(Tfree[i]-T2e[i])/Cc-(T2e[i]-T1e[i])/(R*Cc))
-        T2ef[i+1] = T2ef[i] + s*(h_c*(Tair[i]-T2ef[i])/Cc-(T2ef[i]-T1ef[i])/(R*Cc))
-
-        T1s[i+1] = T1s[i] + s*(h_rc*((sol_airs[i]+273.15) - T1s[i])/Cc + (T2s[i]-T1s[i])/(R*Cc))
-        T1sf[i+1] = T1sf[i] + s*(h_rc*((sol_airs[i]+273.15) - T1sf[i])/Cc + (T2sf[i]-T1sf[i])/(R*Cc))
-
-        T2s[i+1] = T2s[i] + s*(h_c*(Tfree[i]-T2s[i])/Cc-(T2s[i]-T1s[i])/(R*Cc))
-        T2sf[i+1] = T2sf[i] + s*(h_c*(Tair[i]-T2sf[i])/Cc-(T2sf[i]-T1sf[i])/(R*Cc))
-
-        T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc))
-        T1wf[i+1] = T1wf[i] + s*(h_rc*((sol_airw[i]+273.15) - T1wf[i])/Cc + (T2wf[i]-T1wf[i])/(R*Cc));
+        T1nf[0] = 273.15 + Ti
+        T2nf[0] = 273.15 + Ti+.001
+        T1ef[0] = 273.15 + Ti
+        T2ef[0] = 273.15 + Ti+.001
+        T1sf[0] = 273.15 + Ti
+        T2sf[0] = 273.15 + Ti+.001
+        T1wf[0] = 273.15 + Ti
+        T2wf[0] = 273.15 + Ti+.001
 
 
-        T2w[i+1] = T2w[i] + s*(h_c*(Tfree[i]-T2w[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
-        T2wf[i+1] = T2wf[i] + s*(h_c*(Tair[i]-T2wf[i])/Cc-(T2wf[i]-T1wf[i])/(R*Cc));
+        Tair = np.empty(N)
+        Tair[0] = 273.15 + Ti
+        Tfree = np.empty(N)
+        Tfree[0] = 273.15 + Ti
 
-        
-        Q[i] = h_c*((an-a)*(T2nf[i]-273.15-Tcomf)+(ae-a)*(T2ef[i]-273.15-Tcomf)+(aS-a)*(T2sf[i]-273.15-Tcomf)+(aw-a)*(T2wf[i]-273.15-Tcomf))
+        s = (noOfDays*24*3600-0)/N
 
-        if Q[i] < 0:
-            Q[i] = 0
+        an = width*height
+        ae = length*height
+        aS = width*height
+        aw = length*width
 
-        Tfree[i+1] = Tfree[i] + s*(h_c*((an-a)*(T2n[i]-Tfree[i])+(ae-a)*(T2e[i]-Tfree[i])+(aS-a)*(T2s[i]-Tfree[i])+(aw-a)*(T2w[i]-Tfree[i])))/(C_air)
-        Tair[i+1] = Tair[i] + s*(h_c*((an-a)*(T2nf[i]-Tair[i])+(ae-a)*(T2ef[i]-Tair[i])+(aS-a)*(T2sf[i]-Tair[i])+(aw-a)*(T2wf[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
+
+        A_f = (length-2*thickness)*(width-2*thickness)
+        V = A_f*(height)
+        dens = 1.225 #density of air 
+        c_a = 0.718*1000 #specific heat of air
+        C_air = V*dens*c_a
+
+        Q = np.zeros(N)
+
+        a = thickness*height 
+
+        Tc = np.empty(N)
+        Tc[0] = Tair[0]
+
+        for i in range(N-1):
+
+            T1n[i+1] = T1n[i] + s*(h_rc*((sol_airn[i]+273.15) - T1n[i])/Cc + (T2n[i]-T1n[i])/(R*Cc))
+            T1nf[i+1] = T1nf[i] + s*(h_rc*((sol_airn[i]+273.15) - T1nf[i])/Cc + (T2nf[i]-T1nf[i])/(R*Cc))
+
+            T2n[i+1] = T2n[i] + s*(h_c*(Tfree[i]-T2n[i])/Cc-(T2n[i]-T1n[i])/(R*Cc))
+            T2nf[i+1] = T2nf[i] + s*(h_c*(Tair[i]-T2nf[i])/Cc-(T2nf[i]-T1nf[i])/(R*Cc))
+
+            T1e[i+1] = T1e[i] + s*(h_rc*((sol_aire[i]+273.15) - T1e[i])/Cc + (T2e[i]-T1e[i])/(R*Cc))
+            T1ef[i+1] = T1ef[i] + s*(h_rc*((sol_aire[i]+273.15) - T1ef[i])/Cc + (T2ef[i]-T1ef[i])/(R*Cc))
+
+            T2e[i+1] = T2e[i] + s*(h_c*(Tfree[i]-T2e[i])/Cc-(T2e[i]-T1e[i])/(R*Cc))
+            T2ef[i+1] = T2ef[i] + s*(h_c*(Tair[i]-T2ef[i])/Cc-(T2ef[i]-T1ef[i])/(R*Cc))
+
+            T1s[i+1] = T1s[i] + s*(h_rc*((sol_airs[i]+273.15) - T1s[i])/Cc + (T2s[i]-T1s[i])/(R*Cc))
+            T1sf[i+1] = T1sf[i] + s*(h_rc*((sol_airs[i]+273.15) - T1sf[i])/Cc + (T2sf[i]-T1sf[i])/(R*Cc))
+
+            T2s[i+1] = T2s[i] + s*(h_c*(Tfree[i]-T2s[i])/Cc-(T2s[i]-T1s[i])/(R*Cc))
+            T2sf[i+1] = T2sf[i] + s*(h_c*(Tair[i]-T2sf[i])/Cc-(T2sf[i]-T1sf[i])/(R*Cc))
+
+            T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc))
+            T1wf[i+1] = T1wf[i] + s*(h_rc*((sol_airw[i]+273.15) - T1wf[i])/Cc + (T2wf[i]-T1wf[i])/(R*Cc));
+
+
+            T2w[i+1] = T2w[i] + s*(h_c*(Tfree[i]-T2w[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
+            T2wf[i+1] = T2wf[i] + s*(h_c*(Tair[i]-T2wf[i])/Cc-(T2wf[i]-T1wf[i])/(R*Cc));
+
+            
+            Q[i] = k#h_c*((an-a)*(T2nf[i]-273.15-Tcomf)+(ae-a)*(T2ef[i]-273.15-Tcomf)+(aS-a)*(T2sf[i]-273.15-Tcomf)+(aw-a)*(T2wf[i]-273.15-Tcomf))
+
+            if Q[i] < 0:
+                Q[i] = 0
+
+            Tfree[i+1] = Tfree[i] + s*(h_c*((an-a)*(T2n[i]-Tfree[i])+(ae-a)*(T2e[i]-Tfree[i])+(aS-a)*(T2s[i]-Tfree[i])+(aw-a)*(T2w[i]-Tfree[i])))/(C_air)
+            Tair[i+1] = Tair[i] + s*(h_c*((an-a)*(T2nf[i]-Tair[i])+(ae-a)*(T2ef[i]-Tair[i])+(aS-a)*(T2sf[i]-Tair[i])+(aw-a)*(T2wf[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
         
     
     
+        
+        Q[N-1] = Q[N-2]
+
+        #
+        secs = np.linspace(0,noOfDays*24*3600,N)
+        energy = simps(y=Q,x=secs,even='avg')
+
+        #show_plot(Tair,Tfree,at,Q, days,fileName)
+        Tairp = np.empty(N)
+        np.copyto(Tairp, Tair)
+
+
+
+
+
+        
+        discomfort = measureD(Tair,secs,Tcomfmin,Tcomfmax)  
+        comfort = measureC(Tairp,secs,Tcomfmin,Tcomfmax)
+
+        print(fileName)
+        print('Required energy {} (days):{} kJ'.format(noOfDays,round((energy/1000),2)))
+        print('Average power required: {} W'.format( round(Q.mean(),2) ) )
+        print('Average temperature in free mode: {} C'.format(Tfree.mean()-273.15))
+        print('Discomfort (D): {}'.format( round(discomfort/(comfort+discomfort),3) ))
+        print('Comfort (C): {}'.format( round(comfort/(comfort+discomfort),3 )))
+        dc.append(round(discomfort/(comfort+discomfort),3))
+        c.append(round(comfort/(comfort+discomfort),3))
     days = dayNames(days)
-    Q[N-1] = Q[N-2]
-
-    #
-    secs = np.linspace(0,noOfDays*24*3600,N)
-    energy = simps(y=Q,x=secs,even='avg')
-
-    show_plot(Tair,Tfree,at,Q, days,fileName)
-    Tfreep = np.empty(N)
-    np.copyto(Tfreep, Tfree)
-
-    indexes_above_max_temp = np.where( Tfreep > (Tcomfmax+273.15))
-    Tfreep[[indexes_above_max_temp]] = Tcomfmax+273.15
-    
-    discomfort = measureD(Tfree,secs,Tcomfmax)  
-    comfort = measureC(Tfreep,secs,Tcomfmax)
-
-    print(fileName)
-    print('Required energy {} (days):{} kJ'.format(noOfDays,round((energy/1000),2)))
-    print('Average power required: {} W'.format( round(Q.mean(),2) ) )
-    print('Average temperature in free mode: {} C'.format(Tfree.mean()-273.15))
-    print('Discomfort (D): {}'.format( round(discomfort/(comfort+discomfort),2) ))
-    print('Comfort (C): {}'.format( round(comfort/(comfort+discomfort),2 )))
+    fig = figure('Thermal Comfort vs Power')
+    energy = fig.add_subplot(111,axisbg='black')
+    energy.set_axisbelow(True)
+    energy.xaxis.set_ticks(np.arange(0,2000,100))
+    params = {'mathtext.default': 'regular' }          
+    rcParams.update(params)
+    energy.xaxis.grid(True,'major',linewidth=.5,linestyle='-', color='w')
+    energy.yaxis.grid(True,'major',linewidth=.5,linestyle='-', color='w')
+    energy.set_xlabel("Power ($W$)")
+    energy.set_ylabel("Thermal Comfort")
+    energy.plot(pow, dc,label='Discomfort ($Q$)',linewidth='1.5')
+    energy.plot(pow,c, label='Comfort ($P$)',linewidth='1.5')
+    energy.legend(loc='best', fontsize='medium',
+        fancybox=True, shadow=True)
+    show()
 
 
-def measureC(Tairf, secs, Tcomfmax):
+    c = np.array(c)
+    index_comf_power = np.where(c == 1)
+    min_opt_power = index_comf_power[0][0]
+    max_opt_power = index_comf_power[0][len(index_comf_power[0])-1]
+
+    pow = [min_opt_power, max_opt_power]
+    count = 0
+    for k in pow:
+        T1n = np.empty(N)
+        T2n = np.empty(N)
+        T1e = np.empty(N)
+        T2e = np.empty(N)
+        T1s = np.empty(N)
+        T2s = np.empty(N)
+        T1w = np.empty(N)
+        T2w = np.empty(N)
+
+        T1n[0] = 273.15 + Ti
+        T2n[0] = 273.15 + Ti+.001
+        T1e[0] = 273.15 + Ti
+        T2e[0] = 273.15 + Ti+.001
+        T1s[0] = 273.15 + Ti
+        T2s[0] = 273.15 + Ti+.001
+        T1w[0] = 273.15 + Ti
+        T2w[0] = 273.15 + Ti+.001
+
+        T1nf = np.empty(N)
+        T2nf = np.empty(N)
+        T1ef = np.empty(N)
+        T2ef = np.empty(N)
+        T1sf = np.empty(N)
+        T2sf = np.empty(N)
+        T1wf = np.empty(N)
+        T2wf = np.empty(N)
+
+        T1nf[0] = 273.15 + Ti
+        T2nf[0] = 273.15 + Ti+.001
+        T1ef[0] = 273.15 + Ti
+        T2ef[0] = 273.15 + Ti+.001
+        T1sf[0] = 273.15 + Ti
+        T2sf[0] = 273.15 + Ti+.001
+        T1wf[0] = 273.15 + Ti
+        T2wf[0] = 273.15 + Ti+.001
+
+
+        Tair = np.empty(N)
+        Tair[0] = 273.15 + Ti
+        Tfree = np.empty(N)
+        Tfree[0] = 273.15 + Ti
+
+        s = (noOfDays*24*3600-0)/N
+
+        an = width*height
+        ae = length*height
+        aS = width*height
+        aw = length*width
+
+
+        A_f = (length-2*thickness)*(width-2*thickness)
+        V = A_f*(height)
+        dens = 1.225 #density of air 
+        c_a = 0.718*1000 #specific heat of air
+        C_air = V*dens*c_a
+
+        Q = np.zeros(N)
+
+        a = thickness*height 
+
+        Tc = np.empty(N)
+        Tc[0] = Tair[0]
+
+        for i in range(N-1):
+
+            T1n[i+1] = T1n[i] + s*(h_rc*((sol_airn[i]+273.15) - T1n[i])/Cc + (T2n[i]-T1n[i])/(R*Cc))
+            T1nf[i+1] = T1nf[i] + s*(h_rc*((sol_airn[i]+273.15) - T1nf[i])/Cc + (T2nf[i]-T1nf[i])/(R*Cc))
+
+            T2n[i+1] = T2n[i] + s*(h_c*(Tfree[i]-T2n[i])/Cc-(T2n[i]-T1n[i])/(R*Cc))
+            T2nf[i+1] = T2nf[i] + s*(h_c*(Tair[i]-T2nf[i])/Cc-(T2nf[i]-T1nf[i])/(R*Cc))
+
+            T1e[i+1] = T1e[i] + s*(h_rc*((sol_aire[i]+273.15) - T1e[i])/Cc + (T2e[i]-T1e[i])/(R*Cc))
+            T1ef[i+1] = T1ef[i] + s*(h_rc*((sol_aire[i]+273.15) - T1ef[i])/Cc + (T2ef[i]-T1ef[i])/(R*Cc))
+
+            T2e[i+1] = T2e[i] + s*(h_c*(Tfree[i]-T2e[i])/Cc-(T2e[i]-T1e[i])/(R*Cc))
+            T2ef[i+1] = T2ef[i] + s*(h_c*(Tair[i]-T2ef[i])/Cc-(T2ef[i]-T1ef[i])/(R*Cc))
+
+            T1s[i+1] = T1s[i] + s*(h_rc*((sol_airs[i]+273.15) - T1s[i])/Cc + (T2s[i]-T1s[i])/(R*Cc))
+            T1sf[i+1] = T1sf[i] + s*(h_rc*((sol_airs[i]+273.15) - T1sf[i])/Cc + (T2sf[i]-T1sf[i])/(R*Cc))
+
+            T2s[i+1] = T2s[i] + s*(h_c*(Tfree[i]-T2s[i])/Cc-(T2s[i]-T1s[i])/(R*Cc))
+            T2sf[i+1] = T2sf[i] + s*(h_c*(Tair[i]-T2sf[i])/Cc-(T2sf[i]-T1sf[i])/(R*Cc))
+
+            T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc))
+            T1wf[i+1] = T1wf[i] + s*(h_rc*((sol_airw[i]+273.15) - T1wf[i])/Cc + (T2wf[i]-T1wf[i])/(R*Cc));
+
+
+            T2w[i+1] = T2w[i] + s*(h_c*(Tfree[i]-T2w[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
+            T2wf[i+1] = T2wf[i] + s*(h_c*(Tair[i]-T2wf[i])/Cc-(T2wf[i]-T1wf[i])/(R*Cc));
+
+            
+            Q[i] = k#h_c*((an-a)*(T2nf[i]-273.15-Tcomf)+(ae-a)*(T2ef[i]-273.15-Tcomf)+(aS-a)*(T2sf[i]-273.15-Tcomf)+(aw-a)*(T2wf[i]-273.15-Tcomf))
+
+            if Q[i] < 0:
+                Q[i] = 0
+
+            Tfree[i+1] = Tfree[i] + s*(h_c*((an-a)*(T2n[i]-Tfree[i])+(ae-a)*(T2e[i]-Tfree[i])+(aS-a)*(T2s[i]-Tfree[i])+(aw-a)*(T2w[i]-Tfree[i])))/(C_air) 
+            Tair[i+1] = Tair[i] + s*(h_c*((an-a)*(T2nf[i]-Tair[i])+(ae-a)*(T2ef[i]-Tair[i])+(aS-a)*(T2sf[i]-Tair[i])+(aw-a)*(T2wf[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
+
+        Q[N-1] = Q[N-2]
+
+        #
+        secs = np.linspace(0,noOfDays*24*3600,N)
+        energy = simps(y=Q,x=secs,even='avg')
+        if count == 0:
+            title = '(minimum comfortable power: {} W)'.format(k)
+        else:
+            title = '(maximum comfortable power: {} W)'.format(k)
+        show_plot(Tair,Tfree,at,Q, days,fileName+' '+title)
+        show()
+        count+=1
+
+        secs = np.linspace(0,noOfDays*24*3600,N)
+        energy = simps(y=Q,x=secs,even='avg')
+
+        #show_plot(Tair,Tfree,at,Q, days,fileName)
+        Tairp = np.empty(N)
+        np.copyto(Tairp, Tair)
+
+
+        
+        discomfort = measureD(Tair,secs,Tcomfmin,Tcomfmax)
+        comfort = measureC(Tairp,secs,Tcomfmin,Tcomfmax)
+
+
+        print('Required energy {} (days):{} kJ'.format(noOfDays,round((energy/1000),2)))
+        print('Average power required: {} W'.format( round(Q.mean(),2) ) )
+        print('Average temperature in free mode: {} C'.format(Tfree.mean()-273.15))
+        print('Discomfort (D): {}'.format( round(discomfort/(comfort+discomfort),3) ))
+        print('Comfort (C): {}'.format( round(comfort/(comfort+discomfort),3 )))
+
+
+def measureC(Tairf, secs, Tcomfmin,Tcomfmax):
+    indexes_above_max_temp = np.where( Tairf > (Tcomfmax+273.15))
+    indexes_below_min_temp = np.where( Tairf < (Tcomfmin+273.15))
+    Tairf[indexes_above_max_temp] = Tcomfmax+273.15
+    Tairf[indexes_below_min_temp] = Tcomfmin+273.15
     C = simps(y=np.full(N,Tcomfmax+273.15), x=secs,even='avg') - simps(y=Tairf, x = secs, even='avg')
     if C < 0:
         C = 0
     return C
 
-def measureD(Tairf,secs,Tcomfmax):
+def measureD(Tairf,secs,Tcomfmin,Tcomfmax):
+    below = np.empty(N)
+    np.copyto(below,Tairf)
     indexes_below_max_temp = np.where(Tairf < (Tcomfmax+273.15))
+    indexes_above_min_temp = np.where(Tairf > (Tcomfmin+273.15)) 
     Tairf[indexes_below_max_temp] = Tcomfmax+273.15
-    D = simps(y=Tairf, x=secs,even='avg') - simps(y=np.full(N,Tcomfmax+273.15), x=secs,even='avg')
+    below[indexes_above_min_temp] = Tcomfmin+273.15
+    D = simps(y=Tairf, x=secs,even='avg') - simps(y=np.full(N,Tcomfmax+273.15), x=secs,even='avg') + (simps(y=np.full(N,Tcomfmin+273.15),x=secs,even='avg')-simps(y=below, x=secs,even='avg'))
     if D<0:
         D=0
     return D
