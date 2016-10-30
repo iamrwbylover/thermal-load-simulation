@@ -206,13 +206,15 @@ def thermalLoad(fileName):
     aw = length*width
 
 
-    A_f = length*width
-    V = A_f*height
+    A_f = (length-2*thickness)*(width-2*thickness)
+    V = A_f*(height)
     dens = 1.225 #density of air 
     c_a = 0.718*1000 #specific heat of air
     C_air = V*dens*c_a
 
     Q = np.zeros(N)
+
+    a = thickness*height 
 
     Tc = np.empty(N)
     Tc[0] = Tair[0]
@@ -251,13 +253,13 @@ def thermalLoad(fileName):
         T2wf[i+1] = T2wf[i] + s*(h_c*(Tair[i]-T2wf[i])/Cc-(T2wf[i]-T1wf[i])/(R*Cc));
 
         
-        Q[i] = h_c*(an*(T2nf[i]-273.15-Tcomf)+ae*(T2ef[i]-273.15-Tcomf)+aS*(T2sf[i]-273.15-Tcomf)+aw*(T2wf[i]-273.15-Tcomf))
+        Q[i] = h_c*((an-a)*(T2nf[i]-273.15-Tcomf)+(ae-a)*(T2ef[i]-273.15-Tcomf)+(aS-a)*(T2sf[i]-273.15-Tcomf)+(aw-a)*(T2wf[i]-273.15-Tcomf))
 
         if Q[i] < 0:
             Q[i] = 0
 
-        Tfree[i+1] = Tfree[i] + s*(h_c*(an*(T2n[i]-Tfree[i])+ae*(T2e[i]-Tfree[i])+aS*(T2s[i]-Tfree[i])+aw*(T2w[i]-Tfree[i])))/(C_air)
-        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2nf[i]-Tair[i])+ae*(T2ef[i]-Tair[i])+aS*(T2sf[i]-Tair[i])+aw*(T2wf[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
+        Tfree[i+1] = Tfree[i] + s*(h_c*((an-a)*(T2n[i]-Tfree[i])+(ae-a)*(T2e[i]-Tfree[i])+(aS-a)*(T2s[i]-Tfree[i])+(aw-a)*(T2w[i]-Tfree[i])))/(C_air)
+        Tair[i+1] = Tair[i] + s*(h_c*((an-a)*(T2nf[i]-Tair[i])+(ae-a)*(T2ef[i]-Tair[i])+(aS-a)*(T2sf[i]-Tair[i])+(aw-a)*(T2wf[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
         
     
     

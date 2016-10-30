@@ -1,11 +1,16 @@
-Thesisit/
+thermal-load-simulation/
 	__init__.py
 	main.py
 	settings.sqlite
+	requirements.txt
+	settings.sqlite
+	README.md
 	Core/
 		__init__.py
 		Calculation/
 			__init__.py
+			fit.py
+			radiation.py
 			sunpath.py
 			wall_thermal.py
 		Database/
@@ -13,7 +18,11 @@ Thesisit/
 			Database.py
 			Insert.py
 			Query.py
+	Data/
+		Conditions/
+		Radiation/
+		SunPath/
+		materials.xlsx
 	Gui/
-		__init__.py
-		thesisgui.py
+		load.ui
 		thesisgui.ui		
