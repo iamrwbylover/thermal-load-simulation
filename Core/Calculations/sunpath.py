@@ -10,8 +10,8 @@ engine = create_engine('sqlite:///settings.sqlite', echo=False)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-noOfDays = 7
-
+noOfDays = 1
+N = 500
 
 
 
@@ -59,7 +59,7 @@ def countNomimal(year,month, day):
 	return numDay
 
 def timeCorrection(numDay):
-	global yearDays, longi, LSTM
+	global yearDays, longi, LSTM, N
 	EoT = np.zeros(yearDays)
 	TC = np.zeros(yearDays)
 	HRA = np.zeros(N)
@@ -81,6 +81,7 @@ def deltaCalc(numDay):
 
 def anglesCalc(delta, HRA):
     global lat
+    N = 500
     elev = np.zeros(N)
     azi = np.zeros(N)
 
@@ -107,12 +108,10 @@ def save(elevs, azis, fileName):
     writer.close()
     print("Sunpath angles saved as excel file.")
 
-lat,longi, LSTM = 0,0,0
-N = 500
 #function to assign values 
 
 def calculateSunPath(fileName):
-    global longi, lat,LSTM, yearDays, numDay
+    global longi, lat,LSTM, yearDays, numDay, noOfDays, N
     delta = 8
     LSTM = 15*delta
     phi = np.pi/2
@@ -126,13 +125,16 @@ def calculateSunPath(fileName):
         year = int(query.date[0:4])
         month = int(query.date[5:7])
         day = int(query.date[9:11])
-
-	#functions
+        noOfDays = int(query.numDays)
+    
+    
+	
+    #functions
     conA, conE = [], []
     for addition in range(noOfDays):
         addition = int(addition)
         numDay = countNomimal(year,month, day+addition)
-        HRA= timeCorrection(numDay+addition)     
+        HRA = timeCorrection(numDay+addition)     
         delta = deltaCalc(numDay+addition)
         elev, azi = anglesCalc(delta, HRA)
         conA.append(azi)

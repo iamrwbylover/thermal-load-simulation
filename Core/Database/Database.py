@@ -31,7 +31,7 @@ class Settings(Base):
     direction = Column(Float)
     initTemp = Column(Float)
     comfTemp = Column(Float)
-
+    numDays = Column(Float)
     def __repr__(self):
         return "<Settings(name='%s', latitude = '%f', longitude = '%f',altitude = '%f',date = '%s',shortwave reflection coefficient = '%f',longwave reflection coefficient = '%f',longwave emissivity = '%f',)>" %(self.name,self.latitude, self.longitude, self.altitude,str(self.date), self.swRC, self.lwRC, self.lwE)
 

@@ -1395,7 +1395,7 @@
              <double>1.000000000000000</double>
             </property>
             <property name="value">
-             <double>28.000000000000000</double>
+             <double>25.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -1536,10 +1536,95 @@
         </item>
        </layout>
       </widget>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>270</y>
+         <width>351</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="title">
+        <string>Simulation Length</string>
+       </property>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>331</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_22">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string># of days of simulation</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_22">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="noOfDays">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="minimum">
+             <double>0</double>
+            </property>
+            <property name="maximum">
+             <double>366</double>
+            </property>
+           <property name="value">
+            <double>7.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
       <zorder>layoutWidget</zorder>
       <zorder>TP_2</zorder>
       <zorder>RC_2</zorder>
       <zorder>label_2</zorder>
+      <zorder>groupBox_2</zorder>
      </widget>
     </widget>
    </widget>

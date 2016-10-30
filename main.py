@@ -1,9 +1,12 @@
+import matplotlib
+matplotlib.use('Qt5Agg')
 import sys
 from Core.Calculations import sunpath
 from PyQt5 import uic, QtWidgets
 from Core.Database.Database import Settings
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+import sqlalchemy
 from Core.Calculations import radiation, thermalLoad, fit
 engine = create_engine('sqlite:///settings.sqlite', echo = False)
 Session = sessionmaker(bind=engine)
@@ -29,7 +32,7 @@ class Load(QtWidgets.QDialog, load):
 
 		self.cb.activated.connect(self.loadIt)
 		self.populate()
-		
+
 	def loadIt(self,i):
 		fileName = self.cb.currentText()
 		msg = QtWidgets.QMessageBox()
@@ -43,8 +46,7 @@ class Load(QtWidgets.QDialog, load):
 		
 		if retVal == QtWidgets.QMessageBox.Ok:
 			self.close()
-			print(fileName)
-			thermalLoad.thermalLoad(fileName)		
+			thermalLoad.thermalLoad(fileName)
 		else:
 			msg.close()
 		
@@ -54,6 +56,7 @@ class Load(QtWidgets.QDialog, load):
 			if sett.name not in items:
 				self.cb.addItem(sett.name)
 				items.append(sett.name)
+                
 
 class Main(QtWidgets.QMainWindow, Ui_MainWindow):
 	def __init__(self, parent=None):
@@ -92,6 +95,13 @@ class Main(QtWidgets.QMainWindow, Ui_MainWindow):
 		global i
 		i = i-1
 		self.stackedWidget.setCurrentIndex(i)
+	def processes(self, fileName):
+		sunpath.calculateSunPath(fileName)	
+		radiation.calculateRadiation(fileName)
+		self.statusBar.showMessage("Saved.",2000)
+		self.statusBar.showMessage("Calculating...")
+		thermalLoad.thermalLoad(fileName)
+		self.statusBar.showMessage("Done.",2000)
 	def saveButton(self):
 		msg = QtWidgets.QMessageBox()
 		msg.setIcon(QtWidgets.QMessageBox.Question)
@@ -103,7 +113,7 @@ class Main(QtWidgets.QMainWindow, Ui_MainWindow):
 		retVal = msg.exec_()
 		
 		if retVal == QtWidgets.QMessageBox.Ok:
-			self.statusBar.showMessage("Saving...", 2000)
+			self.statusBar.showMessage("Saving...")
 			#data list
 			fileName = self.datasetName.text()
 			entry = Settings(name = fileName,
@@ -126,19 +136,33 @@ class Main(QtWidgets.QMainWindow, Ui_MainWindow):
 							height = self.heightBox.value(),
 							direction = self.normVectorBox.value(),
 							initTemp = self.initialTempBox.value(),
-							comfTemp = self.comfTempBox.value()
+							comfTemp = self.comfTempBox.value(),
+							numDays = self.noOfDays.value()
 							)
-			
-			
-			session.add(entry)
-			session.commit()
-			sunpath.calculateSunPath(fileName)	
-			radiation.calculateRadiation(fileName)
-			self.statusBar.showMessage("Saved.", 2000)
-			thermalLoad.thermalLoad(fileName)
-			self.load.populate()
-		else:
+			try:
+				session.add(entry)
+				session.commit()
+				self.load.populate()
+				self.processes(fileName)
+				
+			except:
+				msg.setIcon(QtWidgets.QMessageBox.Warning)
+				msg.setText("An existing dataset has the same name. Overwrite changes?")
+				msg.setWindowTitle("Warning")
+				msg.setStandardButtons(QtWidgets.QMessageBox.Ok| QtWidgets.QMessageBox.Cancel)
 
+				retVal = msg.exec_()
+				if retVal == QtWidgets.QMessageBox.Ok:
+					session.rollback()
+					session.query(Settings).filter(Settings.name==fileName).delete()
+					session.add(entry)
+					session.commit()
+					self.load.populate()
+					self.processes(fileName)
+
+
+			
+		else:
 			self.statusBar.showMessage("Cancelled.", 2000)
 
 
@@ -146,4 +170,5 @@ if __name__ == "__main__":
 	app = QtWidgets.QApplication(sys.argv)
 	window = Main()
 	window.show()
+
 	sys.exit(app.exec_())

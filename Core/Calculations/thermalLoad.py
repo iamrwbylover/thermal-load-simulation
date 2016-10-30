@@ -9,21 +9,18 @@ from Core.Database.Database import Settings
 from Core.Calculations.fit import fit
 from scipy.integrate import simps, odeint
 from matplotlib.pyplot import show,plot
+from Core.Calculations import radiation, sunpath
+
 
 engine = create_engine('sqlite:///settings.sqlite', echo=False)
 
 Session = sessionmaker(bind=engine)
 session = Session()
 
-noOfDays = 7
-
-count = 0
+noOfDays = 1
 N = noOfDays*500
 
-sol_airn = np.empty(N)
-sol_aire = np.empty(N)
-sol_airs = np.empty(N)
-sol_airw = np.empty(N)
+
 
 
 
@@ -75,17 +72,18 @@ def cc(i):
     else:
         return 1.0
 
+
 def skyTemp(i):
     global sigma, cloudCover, dew_point
     I = cc(i)*(I_cloud(i))+(1-cc(i))*sigma*(air_temp(hour[i])**4)*(0.79-0.174*10**(-0.041*vapor_pressure(i)))
     return (I/sigma)**.25
 def T_sa(i, I):
     global h_rc, air_temp, dew_point, epsi, alpha
-    T = air_temp(hour[i])-273.15 + alpha*I[i]/h_rc- g_atm*6.5*(air_temp(hour[i]) - skyTemp(i))/h_rc
+    T = air_temp(hour[i])-273.15 + alpha*I[i]/h_rc - g_atm*6.5*(air_temp(hour[i]) - skyTemp(i))/h_rc
     return T
 
 def thermalLoad(fileName):
-    global alpha, N, air_temp, dew_point, epsi, cloudCover, relHum
+    global alpha, N, air_temp, dew_point, epsi, cloudCover, relHum, noOfDays,N, hour
     global sol_airn,sol_aire,sol_airs,sol_airw
     for sett in session.query(Settings).filter(Settings.name==fileName):
 
@@ -106,14 +104,28 @@ def thermalLoad(fileName):
         alpha = sett.swAbs
         epsi = sett.lwEWall
         sigma = 5.67*(10)**(-8)
-    
+        noOfDays = int(sett.numDays)
+    N = noOfDays*500
+    hour = np.linspace(0,noOfDays*24,N)
+    sol_airn = np.empty(N)
+    sol_aire = np.empty(N)
+    sol_airs = np.empty(N)
+    sol_airw = np.empty(N)
+
+
     air_temp, dew_point, relHum, cloudCover, days = fit(fileName)
     R = thickness/k
     Cc = rho*c*thickness/2
     #call function of air and vapor pressure
 
     excel = "Data/Radiation/ShortwaveRadiation-"+fileName+".xlsx"
-    rad = pd.read_excel(excel)
+    
+    try:
+        rad = pd.read_excel(excel)
+    except FileNotFoundError as error:
+        sp = sunpath.calculateSunPath(fileName)
+        r = radiation.calculateRadiation(fileName)
+        rad = pd.read_excel(excel)
     I_sn = rad['Northern']
     I_se = rad['Eastern']
     I_ss = rad['Southern']
@@ -128,15 +140,20 @@ def thermalLoad(fileName):
 
     
     at = np.empty(N)
-
+    sky = []
     for i in range(N):
         sol_airn[i] = T_sa(i, I_sn)
         sol_aire[i] = T_sa(i, I_se)
         sol_airs[i] = T_sa(i, I_ss)
         sol_airw[i] = T_sa(i, I_sw)
         at[i] = air_temp(hour[i])
-
-    #heat
+        
+    # plot(sol_airn)
+    # plot(sol_aire)
+    # plot(sol_airw)
+    # plot(sol_airs)
+    # show()
+    # #heat
     Qt = np.empty(N) # total heat
 
     T1n = np.empty(N)
@@ -149,16 +166,37 @@ def thermalLoad(fileName):
     T2w = np.empty(N)
 
     T1n[0] = 273.15 + Ti
-    T2n[0] = 273.15 + Ti+1
+    T2n[0] = 273.15 + Ti+.001
     T1e[0] = 273.15 + Ti
-    T2e[0] = 273.15 + Ti+1
+    T2e[0] = 273.15 + Ti+.001
     T1s[0] = 273.15 + Ti
-    T2s[0] = 273.15 + Ti+1
+    T2s[0] = 273.15 + Ti+.001
     T1w[0] = 273.15 + Ti
-    T2w[0] = 273.15 + Ti+1
+    T2w[0] = 273.15 + Ti+.001
+
+    T1nf = np.empty(N)
+    T2nf = np.empty(N)
+    T1ef = np.empty(N)
+    T2ef = np.empty(N)
+    T1sf = np.empty(N)
+    T2sf = np.empty(N)
+    T1wf = np.empty(N)
+    T2wf = np.empty(N)
+
+    T1nf[0] = 273.15 + Ti
+    T2nf[0] = 273.15 + Ti+.001
+    T1ef[0] = 273.15 + Ti
+    T2ef[0] = 273.15 + Ti+.001
+    T1sf[0] = 273.15 + Ti
+    T2sf[0] = 273.15 + Ti+.001
+    T1wf[0] = 273.15 + Ti
+    T2wf[0] = 273.15 + Ti+.001
+
 
     Tair = np.empty(N)
     Tair[0] = 273.15 + Ti
+    Tfree = np.empty(N)
+    Tfree[0] = 273.15 + Ti
 
     s = (noOfDays*24*3600-0)/N
 
@@ -179,50 +217,88 @@ def thermalLoad(fileName):
     Tc = np.empty(N)
     Tc[0] = Tair[0]
 
-    Tfree = np.empty(N)
-    Tfree[0] = Ti + 273.15
-
-    Tcomfmin = 23
-    Tcomfmax = 26
-
-
     
+
+    Tcomfmin = Tcomf-3
+    Tcomfmax = Tcomf+1
+
 
     for i in range(N-1):
-        T1n[i+1] = T1n[i] + s*(h_rc*((sol_airn[i]+273.15) - T1n[i])/Cc + (T2n[i]-T1n[i])/(R*Cc));
-        T2n[i+1] = T2n[i] + s*(h_c*(Tair[i]-T2n[i])/Cc-(T2n[i]-T1n[i])/(R*Cc));
-        T1e[i+1] = T1e[i] + s*(h_rc*((sol_aire[i]+273.15) - T1e[i])/Cc + (T2e[i]-T1e[i])/(R*Cc));
-        T2e[i+1] = T2e[i] + s*(h_c*(Tair[i]-T2e[i])/Cc-(T2e[i]-T1e[i])/(R*Cc));
-        T1s[i+1] = T1s[i] + s*(h_rc*((sol_airs[i]+273.15) - T1s[i])/Cc + (T2s[i]-T1s[i])/(R*Cc));
-        T2s[i+1] = T2s[i] + s*(h_c*(Tair[i]-T2s[i])/Cc-(T2s[i]-T1s[i])/(R*Cc));
-        T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc));
-        T2w[i+1] = T2w[i] + s*(h_c*(Tair[i]-T2w[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
+
+        T1n[i+1] = T1n[i] + s*(h_rc*((sol_airn[i]+273.15) - T1n[i])/Cc + (T2n[i]-T1n[i])/(R*Cc))
+        T1nf[i+1] = T1nf[i] + s*(h_rc*((sol_airn[i]+273.15) - T1nf[i])/Cc + (T2nf[i]-T1nf[i])/(R*Cc))
+
+        T2n[i+1] = T2n[i] + s*(h_c*(Tfree[i]-T2n[i])/Cc-(T2n[i]-T1n[i])/(R*Cc))
+        T2nf[i+1] = T2nf[i] + s*(h_c*(Tair[i]-T2nf[i])/Cc-(T2nf[i]-T1nf[i])/(R*Cc))
+
+        T1e[i+1] = T1e[i] + s*(h_rc*((sol_aire[i]+273.15) - T1e[i])/Cc + (T2e[i]-T1e[i])/(R*Cc))
+        T1ef[i+1] = T1ef[i] + s*(h_rc*((sol_aire[i]+273.15) - T1ef[i])/Cc + (T2ef[i]-T1ef[i])/(R*Cc))
+
+        T2e[i+1] = T2e[i] + s*(h_c*(Tfree[i]-T2e[i])/Cc-(T2e[i]-T1e[i])/(R*Cc))
+        T2ef[i+1] = T2ef[i] + s*(h_c*(Tair[i]-T2ef[i])/Cc-(T2ef[i]-T1ef[i])/(R*Cc))
+
+        T1s[i+1] = T1s[i] + s*(h_rc*((sol_airs[i]+273.15) - T1s[i])/Cc + (T2s[i]-T1s[i])/(R*Cc))
+        T1sf[i+1] = T1sf[i] + s*(h_rc*((sol_airs[i]+273.15) - T1sf[i])/Cc + (T2sf[i]-T1sf[i])/(R*Cc))
+
+        T2s[i+1] = T2s[i] + s*(h_c*(Tfree[i]-T2s[i])/Cc-(T2s[i]-T1s[i])/(R*Cc))
+        T2sf[i+1] = T2sf[i] + s*(h_c*(Tair[i]-T2sf[i])/Cc-(T2sf[i]-T1sf[i])/(R*Cc))
+
+        T1w[i+1] = T1w[i] + s*(h_rc*((sol_airw[i]+273.15) - T1w[i])/Cc + (T2w[i]-T1w[i])/(R*Cc))
+        T1wf[i+1] = T1wf[i] + s*(h_rc*((sol_airw[i]+273.15) - T1wf[i])/Cc + (T2wf[i]-T1wf[i])/(R*Cc));
+
+
+        T2w[i+1] = T2w[i] + s*(h_c*(Tfree[i]-T2w[i])/Cc-(T2w[i]-T1w[i])/(R*Cc));
+        T2wf[i+1] = T2wf[i] + s*(h_c*(Tair[i]-T2wf[i])/Cc-(T2wf[i]-T1wf[i])/(R*Cc));
 
         
-        Tfree[i+1] = Tfree[i] + s*(h_c*(an*(T2n[i]-Tfree[i])+ae*(T2e[i]-Tfree[i])+aS*(T2s[i]-Tfree[i])+aw*(T2w[i]-Tfree[i])))/(C_air)
-        diff = (Tfree[i+1]-Tfree[i])
+        Q[i] = h_c*(an*(T2nf[i]-273.15-Tcomf)+ae*(T2ef[i]-273.15-Tcomf)+aS*(T2sf[i]-273.15-Tcomf)+aw*(T2wf[i]-273.15-Tcomf))
 
-        
-        if Tfree[i+1] < (Tcomfmax+273.15):
+        if Q[i] < 0:
             Q[i] = 0
 
-        else:
-            Q[i] = (h_c*(an*(T2n[i]-273.15-Tcomf)+ae*(T2e[i]-273.15-Tcomf)+aS*(T2s[i]-273.15-Tcomf)+aw*(T2w[i]-273.15-Tcomf)))
+        Tfree[i+1] = Tfree[i] + s*(h_c*(an*(T2n[i]-Tfree[i])+ae*(T2e[i]-Tfree[i])+aS*(T2s[i]-Tfree[i])+aw*(T2w[i]-Tfree[i])))/(C_air)
+        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2nf[i]-Tair[i])+ae*(T2ef[i]-Tair[i])+aS*(T2sf[i]-Tair[i])+aw*(T2wf[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
         
-        Tair[i+1] = Tair[i] + s*(h_c*(an*(T2n[i]-Tair[i])+ae*(T2e[i]-Tair[i])+aS*(T2s[i]-Tair[i])+aw*(T2w[i]-Tair[i])))/(C_air) - s*Q[i]/(C_air)
     
-            
-
+    
     days = dayNames(days)
     Q[N-1] = Q[N-2]
 
     #
     secs = np.linspace(0,noOfDays*24*3600,N)
     energy = simps(y=Q,x=secs,even='avg')
-    print(fileName)
-    print('Required energy (5 days):{} kJ'.format(round((energy/1000),2)))
-    show_plot(Tair,Tfree,at,Q, days,fileName)
 
+    show_plot(Tair,Tfree,at,Q, days,fileName)
+    Tfreep = np.empty(N)
+    np.copyto(Tfreep, Tfree)
+
+    indexes_above_max_temp = np.where( Tfreep > (Tcomfmax+273.15))
+    Tfreep[[indexes_above_max_temp]] = Tcomfmax+273.15
+    
+    discomfort = measureD(Tfree,secs,Tcomfmax)  
+    comfort = measureC(Tfreep,secs,Tcomfmax)
+
+    print(fileName)
+    print('Required energy {} (days):{} kJ'.format(noOfDays,round((energy/1000),2)))
+    print('Average power required: {} W'.format( round(Q.mean(),2) ) )
+    print('Average temperature in free mode: {} C'.format(Tfree.mean()-273.15))
+    print('Discomfort (D): {}'.format( round(discomfort/(comfort+discomfort),2) ))
+    print('Comfort (C): {}'.format( round(comfort/(comfort+discomfort),2 )))
+
+
+def measureC(Tairf, secs, Tcomfmax):
+    C = simps(y=np.full(N,Tcomfmax+273.15), x=secs,even='avg') - simps(y=Tairf, x = secs, even='avg')
+    if C < 0:
+        C = 0
+    return C
+
+def measureD(Tairf,secs,Tcomfmax):
+    indexes_below_max_temp = np.where(Tairf < (Tcomfmax+273.15))
+    Tairf[indexes_below_max_temp] = Tcomfmax+273.15
+    D = simps(y=Tairf, x=secs,even='avg') - simps(y=np.full(N,Tcomfmax+273.15), x=secs,even='avg')
+    if D<0:
+        D=0
+    return D
 
 def dayNames(days):
     names = []
@@ -297,7 +373,6 @@ def show_plot(Tair, Tfree,at, Q, days,fileName):
     #for mathematical fonts
     params = {'mathtext.default': 'regular' }          
     rcParams.update(params)
-    
     energy.plot(hour, Q, linewidth='1.5', label='Energy requirements')
 
     temperature.plot(hour,Tair-273.15, linewidth='1.5', label='$T_{wAC}$')
@@ -306,5 +381,6 @@ def show_plot(Tair, Tfree,at, Q, days,fileName):
     temperature.legend(bbox_to_anchor=(1, 1), loc=2, borderaxespad=0., fontsize='medium',
         fancybox=True, shadow=True)
     show()
+
 
     
