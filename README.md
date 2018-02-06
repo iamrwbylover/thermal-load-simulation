@@ -6,9 +6,11 @@ This program simulates how room air temperature respond to weather conditions. G
 
 To install required packages,
 
-$pip install -r path/to/folder/requirements.txt
-
+```
+pip install -r path/to/folder/requirements.txt
+```
 To run the program,
 
-$python path/to/folder/main.py
-
+```
+python path/to/folder/main.py
+```
